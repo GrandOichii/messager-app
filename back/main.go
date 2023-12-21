@@ -31,10 +31,12 @@ func configMappings(r *gin.Engine) {
 	r.POST("/api/users/login", loginUser)
 
 	r.POST("/api/chats/create", createChat)
+	r.POST("/api/chats/addmessage", addMessage)
 }
 
 func configServices(r *gin.Engine) {
 	userServicer = services.NewUserService()
+	chatServicer = services.NewChatService()
 }
 
 func getUsers(c *gin.Context) {
@@ -92,5 +94,35 @@ func createChat(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, res)
+	c.JSON(http.StatusCreated, res)
+}
+
+func addMessage(c *gin.Context) {
+	var newMessage models.PostMessage
+
+	if err := c.BindJSON(&newMessage); err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	// TODO get user id from JWT
+	user, err := userServicer.ByHandle(newMessage.OwnerHandle)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	chat, err := chatServicer.ByID(newMessage.ChatID)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	res, err := chatServicer.AddMessage(user, chat, &newMessage)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	c.JSON(http.StatusCreated, res)
 }

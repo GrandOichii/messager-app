@@ -26,6 +26,15 @@ func (us *UserService) All() []*models.GetUser {
 	return res
 }
 
+func (us *UserService) ByHandle(handle string) (*models.User, error) {
+	for _, user := range us.users {
+		if user.Handle == handle {
+			return user, nil
+		}
+	}
+	return nil, errors.New("no user with handle " + handle)
+}
+
 func (us *UserService) Register(newUser *models.CreateUser) (*models.GetUser, error) {
 	for _, u := range us.users {
 		if u.Handle == newUser.Handle {

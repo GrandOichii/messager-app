@@ -1,8 +1,9 @@
 package models
 
 type Chat struct {
-	ParticipantHandles []string  `json:"participants"`
-	Messages           []Message `json:"messages"`
+	ID                 string     `json:"id"`
+	ParticipantHandles []string   `json:"participants"`
+	Messages           []*Message `json:"messages"`
 }
 
 func (c *Chat) HasParticipant(handle string) bool {
