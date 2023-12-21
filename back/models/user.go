@@ -1,5 +1,7 @@
 package models
 
+import "errors"
+
 // TODO move all DTOs to a separate folder
 
 type User struct {
@@ -24,8 +26,32 @@ type PostUser struct {
 	Password string `json:"password"`
 }
 
+func (u *PostUser) CheckValid() error {
+	if len(u.Email) == 0 {
+		return errors.New("invalid email")
+	}
+	if len(u.Password) == 0 {
+		return errors.New("invalid password")
+	}
+	return nil
+}
+
 type CreateUser struct {
 	Email    string `json:"email" required:"true"`
 	Password string `json:"password"`
 	Handle   string `json:"handle"`
+}
+
+func (u *CreateUser) CheckValid() error {
+
+	if len(u.Email) == 0 {
+		return errors.New("can't create user with no email")
+	}
+	if len(u.Password) == 0 {
+		return errors.New("can't create user with no password")
+	}
+	if len(u.Handle) == 0 {
+		return errors.New("can't create user with no handle")
+	}
+	return nil
 }
