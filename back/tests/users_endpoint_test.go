@@ -15,7 +15,7 @@ func Test_GetUsers(t *testing.T) {
 
 	w, _ := req(r, t, "GET", "/api/users", nil)
 
-	assert.Equal(t, w.Code, http.StatusOK)
+	assert.Equal(t, http.StatusOK, w.Code)
 }
 
 func Test_Register(t *testing.T) {
@@ -32,8 +32,8 @@ func Test_Register(t *testing.T) {
 	err := json.Unmarshal(data, &newUser)
 	checkErr(t, err)
 
-	assert.Equal(t, w.Code, http.StatusCreated)
-	assert.Equal(t, newUser.Handle, handle)
+	assert.Equal(t, http.StatusCreated, w.Code)
+	assert.Equal(t, handle, newUser.Handle)
 }
 
 func Test_RegisterFail(t *testing.T) {
@@ -68,7 +68,7 @@ func Test_RegisterFail(t *testing.T) {
 		t.Run(tC.desc, func(t *testing.T) {
 			r := router.CreateRouter()
 			w, _ := req(r, t, "POST", "/api/users/register", tC)
-			assert.Equal(t, w.Code, http.StatusBadRequest)
+			assert.Equal(t, http.StatusBadRequest, w.Code)
 		})
 	}
 }
@@ -86,7 +86,7 @@ func Test_Login(t *testing.T) {
 		Password: "1234",
 	})
 
-	assert.Equal(t, w.Code, http.StatusOK)
+	assert.Equal(t, http.StatusOK, w.Code)
 
 }
 
@@ -127,7 +127,6 @@ func Test_LoginFailed(t *testing.T) {
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
 			w, _ := req(r, t, "POST", "/api/users/login", tC)
-
 			assert.Equal(t, http.StatusUnauthorized, w.Code)
 		})
 	}
