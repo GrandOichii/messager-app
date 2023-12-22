@@ -1,8 +1,10 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 
+	"github.com/GrandOichii/messager-app/back/middleware"
 	"github.com/GrandOichii/messager-app/back/models"
 	"github.com/GrandOichii/messager-app/back/services"
 	"github.com/gin-gonic/gin"
@@ -17,15 +19,20 @@ type UsersController struct {
 func (uc *UsersController) Map(r *gin.Engine) {
 	g := r.Group("/api/users")
 
-	// TODO require auth
 	g.GET("", uc.getUsers)
 
 	g.POST("/register", uc.registerUser)
 	g.POST("/login", uc.loginUser)
-
 }
 
 func (uc *UsersController) getUsers(c *gin.Context) {
+	username, err := extract(middleware.IDKey, c)
+	if err != nil {
+		c.AbortWithError(http.StatusUnauthorized, err)
+		return
+	}
+	fmt.Printf("username: %v\n", username)
+
 	c.JSON(http.StatusOK, uc.UserServicer.All())
 }
 
