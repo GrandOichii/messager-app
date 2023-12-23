@@ -53,10 +53,14 @@ func (cs *ChatService) Create(owner string, chatData *models.CreateChat) (*model
 }
 
 func (cs *ChatService) AddMessage(owner *models.User, chat *models.Chat, newMessage *models.PostMessage) (*models.Message, error) {
-	// TODO add more complex messages
 	message := &models.Message{
 		Text:        newMessage.Text,
 		OwnerHandle: owner.Handle,
+	}
+
+	err := message.CheckValid()
+	if err != nil {
+		return nil, err
 	}
 
 	chat.Messages = append(chat.Messages, message)
