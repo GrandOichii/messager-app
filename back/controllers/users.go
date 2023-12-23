@@ -26,13 +26,19 @@ func (uc *UsersController) Map(r *gin.Engine) {
 }
 
 func (uc *UsersController) getUsers(c *gin.Context) {
-	_, err := extract(middleware.IDKey, c)
+	// _, err := extract(middleware.IDKey, c)
+	// if err != nil {
+	// 	c.AbortWithError(http.StatusUnauthorized, err)
+	// 	return
+	// }
+
+	users, err := uc.UserServicer.All()
 	if err != nil {
-		c.AbortWithError(http.StatusUnauthorized, err)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, uc.UserServicer.All())
+	c.JSON(http.StatusOK, users)
 }
 
 func (uc *UsersController) registerUser(c *gin.Context) {

@@ -1,10 +1,14 @@
 package router
 
 import (
+	"context"
+
 	"github.com/GrandOichii/messager-app/back/controllers"
 	"github.com/GrandOichii/messager-app/back/middleware"
 	"github.com/GrandOichii/messager-app/back/services"
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var (
@@ -54,6 +58,15 @@ func configMappings(r *gin.Engine) {
 }
 
 func configServices(r *gin.Engine) {
-	userServicer = services.NewUserService()
+	// userServicer = services.NewUserService()
+	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
+	opts := options.Client().ApplyURI("mongodb://localhost:27017").SetServerAPIOptions(serverAPI)
+
+	client, err := mongo.Connect(context.TODO(), opts)
+	if err != nil {
+		panic(err)
+	}
+
+	userServicer = services.NewUserDBService(client)
 	chatServicer = services.NewChatService(userServicer)
 }

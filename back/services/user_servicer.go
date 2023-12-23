@@ -4,7 +4,7 @@ import "github.com/GrandOichii/messager-app/back/models"
 
 type UserServicer interface {
 	// TODO remove
-	All() []*models.GetUser
+	All() ([]*models.GetUser, error)
 	ByHandle(handle string) (*models.User, error)
 
 	Register(newUser *models.CreateUser) (*models.GetUser, error)

@@ -59,9 +59,7 @@ func (us *UserService) Register(newUser *models.CreateUser) (*models.GetUser, er
 }
 
 func (us *UserService) Login(userData *models.LoginUser) (*models.User, error) {
-	// fmt.Printf("userData.Email: %v\n", userData.Email)
 	for _, user := range us.users {
-		// fmt.Printf("\tuser.EmailHash: %v\n", user.EmailHash)
 		// TODO add email hash check
 		if user.EmailHash != userData.Email {
 			continue
