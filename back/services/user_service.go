@@ -14,13 +14,7 @@ type UserService struct {
 
 func NewUserService() *UserService {
 	return &UserService{
-		users: []*models.User{
-			{
-				Handle:       "handle1",
-				PasswordHash: "pass",
-				EmailHash:    "mail@mail.com",
-			},
-		},
+		users: []*models.User{},
 	}
 }
 

@@ -9,12 +9,14 @@ import (
 type ChatService struct {
 	ChatServicer
 
-	chats []*models.Chat
+	UserService UserServicer
+	chats       []*models.Chat
 }
 
-func NewChatService() *ChatService {
+func NewChatService(userService UserServicer) *ChatService {
 	return &ChatService{
-		chats: []*models.Chat{},
+		chats:       []*models.Chat{},
+		UserService: userService,
 	}
 }
 
@@ -35,8 +37,13 @@ func (cs *ChatService) Create(owner string, chatData *models.CreateChat) (*model
 		}
 	}
 
+	// TODO check that a user with the handle actually exists
+	other, err := cs.UserService.ByHandle(chatData.WithHandle)
+	if err != nil {
+		return nil, err
+	}
 	res := &models.Chat{
-		ParticipantHandles: []string{owner, chatData.WithHandle},
+		ParticipantHandles: []string{owner, other.Handle},
 		Messages:           []*models.Message{},
 	}
 

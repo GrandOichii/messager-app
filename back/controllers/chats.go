@@ -27,28 +27,28 @@ func (cs *ChatsControllers) Map(r *gin.Engine) {
 }
 
 func (cs *ChatsControllers) createChat(c *gin.Context) {
-	// var chatData models.CreateChat
-	// var err error
+	var chatData models.CreateChat
+	var err error
 
-	// if err = c.BindJSON(&chatData); err != nil {
-	// 	c.AbortWithError(http.StatusBadRequest, err)
-	// 	return
-	// }
-	// var res *models.Chat
+	if err = c.BindJSON(&chatData); err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+	var res *models.Chat
 
-	// handle, err := extract(middleware.IDKey, c)
-	// if err != nil {
-	// 	c.AbortWithError(http.StatusUnauthorized, err)
-	// 	return
-	// }
+	handle, err := extract(middleware.IDKey, c)
+	if err != nil {
+		c.AbortWithError(http.StatusUnauthorized, err)
+		return
+	}
 
-	// if res, err = cs.ChatServicer.Create(handle, &chatData); err != nil {
-	// 	c.AbortWithError(http.StatusBadRequest, err)
-	// 	return
-	// }
+	if res, err = cs.ChatServicer.Create(handle, &chatData); err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
 
-	// c.JSON(http.StatusCreated, res)
-	c.JSON(http.StatusCreated, gin.H{})
+	c.JSON(http.StatusCreated, res)
+	// c.JSON(http.StatusCreated, gin.H{})
 }
 
 func (cs *ChatsControllers) addMessage(c *gin.Context) {

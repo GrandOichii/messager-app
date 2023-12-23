@@ -55,5 +55,5 @@ func configMappings(r *gin.Engine) {
 
 func configServices(r *gin.Engine) {
 	userServicer = services.NewUserService()
-	chatServicer = services.NewChatService()
+	chatServicer = services.NewChatService(userServicer)
 }
