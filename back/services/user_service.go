@@ -14,7 +14,13 @@ type UserService struct {
 
 func NewUserService() *UserService {
 	return &UserService{
-		users: []*models.User{},
+		users: []*models.User{
+			{
+				Handle:       "handle1",
+				PasswordHash: "pass",
+				EmailHash:    "mail@mail.com",
+			},
+		},
 	}
 }
 
@@ -58,23 +64,21 @@ func (us *UserService) Register(newUser *models.CreateUser) (*models.GetUser, er
 	return res.ToGetUser(), nil
 }
 
-func (us *UserService) Login(userData *models.PostUser) (string, error) {
-	// TODO add actual JWT tokens
-
+func (us *UserService) Login(userData *models.LoginUser) (*models.User, error) {
+	// fmt.Printf("userData.Email: %v\n", userData.Email)
 	for _, user := range us.users {
+		// fmt.Printf("\tuser.EmailHash: %v\n", user.EmailHash)
 		// TODO add email hash check
 		if user.EmailHash != userData.Email {
 			continue
 		}
+
 		// TODO add password hash check
 		if user.PasswordHash != userData.Password {
-			return "", errors.New("failed to login")
+			return nil, errors.New("failed to login")
 		}
 
-		// TODO return actual jwt token
-
-		return "jwt token", nil
+		return user, nil
 	}
-	return "", errors.New("failed to login")
-
+	return nil, errors.New("failed to login")
 }

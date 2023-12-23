@@ -26,7 +26,7 @@ func Test_Register(t *testing.T) {
 		Email:    "mymail@mail.com",
 		Password: "pass",
 		Handle:   handle,
-	})
+	}, "")
 
 	var newUser *models.GetUser
 	err := json.Unmarshal(data, &newUser)
@@ -67,7 +67,7 @@ func Test_RegisterFail(t *testing.T) {
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
 			r := router.CreateRouter()
-			w, _ := req(r, t, "POST", "/api/users/register", tC)
+			w, _ := req(r, t, "POST", "/api/users/register", tC, "")
 			assert.Equal(t, http.StatusBadRequest, w.Code)
 		})
 	}
@@ -79,12 +79,12 @@ func Test_Login(t *testing.T) {
 		Email:    "mymail@mail.com",
 		Password: "1234",
 		Handle:   "coolhandle",
-	})
+	}, "")
 
-	w, _ := req(r, t, "POST", "/api/users/login", models.PostUser{
+	w, _ := req(r, t, "POST", "/api/users/login", models.LoginUser{
 		Email:    "mymail@mail.com",
 		Password: "1234",
-	})
+	}, "")
 
 	assert.Equal(t, http.StatusOK, w.Code)
 
@@ -96,7 +96,7 @@ func Test_LoginFailed(t *testing.T) {
 		Email:    "mymail@mail.com",
 		Password: "1234",
 		Handle:   "coolhandle",
-	})
+	}, "")
 
 	testCases := []struct {
 		desc     string
@@ -126,7 +126,7 @@ func Test_LoginFailed(t *testing.T) {
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			w, _ := req(r, t, "POST", "/api/users/login", tC)
+			w, _ := req(r, t, "POST", "/api/users/login", tC, "")
 			assert.Equal(t, http.StatusUnauthorized, w.Code)
 		})
 	}

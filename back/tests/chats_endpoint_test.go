@@ -12,14 +12,12 @@ import (
 func Test_CreateChat(t *testing.T) {
 	r := router.CreateRouter()
 	token := loginAs(r, t, "coolhandle", "mymail@mail.com", "1234")
-	t.Log(token)
 	otherHandle := "another"
 	createUser(r, t, otherHandle, "other@mail.com", "pass")
 
-	w, _ := req(r, t, "POST", "/api/chats/create", models.CreateChat{
+	w, data := req(r, t, "POST", "/api/chats/create", models.CreateChat{
 		WithHandle: otherHandle,
-	})
-
-	t.Logf("%v\n", w.Header())
+	}, token)
+	t.Logf("string(data): %v\n", string(data))
 	assert.Equal(t, http.StatusCreated, w.Code)
 }

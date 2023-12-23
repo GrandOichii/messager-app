@@ -21,12 +21,12 @@ type GetUser struct {
 	Handle string `json:"handle"`
 }
 
-type PostUser struct {
+type LoginUser struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
-func (u *PostUser) CheckValid() error {
+func (u *LoginUser) CheckValid() error {
 	if len(u.Email) == 0 {
 		return errors.New("invalid email")
 	}

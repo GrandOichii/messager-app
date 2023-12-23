@@ -23,12 +23,15 @@ func toData(o interface{}) io.Reader {
 	return bytes.NewBuffer(j)
 }
 
-func req(r *gin.Engine, t *testing.T, request string, path string, data interface{}) (*httptest.ResponseRecorder, []byte) {
+func req(r *gin.Engine, t *testing.T, request string, path string, data interface{}, token string) (*httptest.ResponseRecorder, []byte) {
 	var reqData io.Reader = nil
 	if data != nil {
 		reqData = toData(data)
 	}
 	req, err := http.NewRequest(request, path, reqData)
+	if token != "" {
+		req.Header.Add("Authorization", "Bearer "+token)
+	}
 	checkErr(t, err)
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
@@ -43,21 +46,21 @@ func createUser(r *gin.Engine, t *testing.T, handle string, email string, passwo
 		Email:    email,
 		Password: password,
 		Handle:   handle,
-	})
+	}, "")
 }
 
 func loginAs(r *gin.Engine, t *testing.T, handle string, email string, password string) string {
 	createUser(r, t, handle, email, password)
 
-	_, data := req(r, t, "POST", "/api/users/login", models.PostUser{
+	_, data := req(r, t, "POST", "/api/users/login", models.LoginUser{
 		Email:    email,
 		Password: password,
-	})
+	}, "")
 
-	r.Use(func() gin.HandlerFunc {
-		return func(c *gin.Context) {
-			c.Writer.Header().Set("Authorization", "Bearer "+string(data))
-		}
-	}())
-	return string(data)
+	var res struct {
+		Token string `json:"token"`
+	}
+	json.Unmarshal(data, &res)
+
+	return res.Token
 }

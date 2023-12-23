@@ -4,6 +4,8 @@ import (
 	"log"
 	"time"
 
+	"github.com/GrandOichii/messager-app/back/models"
+	"github.com/GrandOichii/messager-app/back/services"
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 )
@@ -15,10 +17,13 @@ const (
 type JwtMiddleware struct {
 	Middleware
 
-	middle *jwt.GinJWTMiddleware
+	UserService services.UserServicer
+
+	// AuthMiddleware
+	Middle *jwt.GinJWTMiddleware
 }
 
-func CreateJwtMiddleware() *JwtMiddleware {
+func CreateJwtMiddleware(uService services.UserServicer) *JwtMiddleware {
 
 	authMiddleware, err := jwt.New(&jwt.GinJWTMiddleware{
 		Realm: "test zone",
@@ -29,46 +34,46 @@ func CreateJwtMiddleware() *JwtMiddleware {
 
 		IdentityKey: IDKey,
 
-		// TODO figure out how to adapt these
-		// PayloadFunc: func(data interface{}) jwt.MapClaims {
-		// 	if v, ok := data.(*User); ok {
-		// 		return jwt.MapClaims{
-		// 			IDKey: v.UserName,
-		// 		}
-		// 	}
-		// 	return jwt.MapClaims{}
-		// },
-		// IdentityHandler: func(c *gin.Context) interface{} {
-		// 	claims := jwt.ExtractClaims(c)
-		// 	return &User{
-		// 		UserName: claims[IDKey].(string),
-		// 	}
-		// },
-		// Authenticator: func(c *gin.Context) (interface{}, error) {
-		// 	var loginVals login
-		// 	if err := c.ShouldBind(&loginVals); err != nil {
-		// 		return "", jwt.ErrMissingLoginValues
-		// 	}
-		// 	userID := loginVals.Username
-		// 	password := loginVals.Password
+		PayloadFunc: func(data interface{}) jwt.MapClaims {
+			if v, ok := data.(*models.User); ok {
+				return jwt.MapClaims{
+					IDKey: v.Handle,
+				}
+			}
+			return jwt.MapClaims{}
+		},
+		IdentityHandler: func(c *gin.Context) interface{} {
+			claims := jwt.ExtractClaims(c)
+			return &models.User{
+				Handle: claims[IDKey].(string),
+			}
+		},
+		Authenticator: func(c *gin.Context) (interface{}, error) {
+			var loginVals models.LoginUser
+			if err := c.BindJSON(&loginVals); err != nil {
+				return "", jwt.ErrMissingLoginValues
+			}
 
-		// 	if (userID == "admin" && password == "admin") || (userID == "test" && password == "test") {
-		// 		return &User{
-		// 			UserName:  userID,
-		// 			LastName:  "Bo-Yi",
-		// 			FirstName: "Wu",
-		// 		}, nil
-		// 	}
+			// userID := loginVals.Email
+			// password := loginVals.Password
 
-		// 	return nil, jwt.ErrFailedAuthentication
-		// },
-		// Authorizator: func(data interface{}, c *gin.Context) bool {
-		// 	if v, ok := data.(*User); ok && v.UserName == "admin" {
-		// 		return true
-		// 	}
+			result, err := uService.Login(&loginVals)
+			if err != nil {
+				return nil, jwt.ErrFailedAuthentication
+			}
 
-		// 	return false
-		// },
+			return result, nil
+
+		},
+		Authorizator: func(data interface{}, c *gin.Context) bool {
+			// if v, ok := data.(*models.User); ok && v.UserName == "admin" {
+			// 	return true
+			// }
+
+			// TODO figure out what this is for
+
+			return true
+		},
 		Unauthorized: func(c *gin.Context, code int, message string) {
 			c.JSON(code, gin.H{
 				"code":    code,
@@ -105,8 +110,11 @@ func CreateJwtMiddleware() *JwtMiddleware {
 	}
 
 	result := &JwtMiddleware{
-		middle: authMiddleware,
+		Middle: authMiddleware,
 	}
-
 	return result
+}
+
+func (jm *JwtMiddleware) GetMiddlewareFunc() gin.HandlerFunc {
+	return jm.Middle.MiddlewareFunc()
 }

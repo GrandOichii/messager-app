@@ -13,17 +13,23 @@ var (
 
 	controllers_ []controllers.Controller
 
-	auth = middleware.CreateJwtMiddleware()
+	auth *middleware.JwtMiddleware
 )
 
 func CreateRouter() *gin.Engine {
 	res := gin.Default()
 
 	configServices(res)
+	configMiddleware()
 	createControllers()
+
 	configMappings(res)
 
 	return res
+}
+
+func configMiddleware() {
+	auth = middleware.CreateJwtMiddleware(userServicer)
 }
 
 func createControllers() {
@@ -35,6 +41,7 @@ func createControllers() {
 		&controllers.ChatsControllers{
 			UserServicer: userServicer,
 			ChatServicer: chatServicer,
+			Auth:         auth,
 		},
 	}
 }
