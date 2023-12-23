@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	IDKey string = "identity"
+	IDKey string = "handle"
 )
 
 type JwtMiddleware struct {

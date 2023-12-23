@@ -3,6 +3,7 @@ package controllers
 import (
 	"net/http"
 
+	"github.com/GrandOichii/messager-app/back/middleware"
 	"github.com/GrandOichii/messager-app/back/models"
 	"github.com/GrandOichii/messager-app/back/services"
 	"github.com/gin-gonic/gin"
@@ -18,9 +19,7 @@ type ChatsControllers struct {
 func (cs *ChatsControllers) Map(r *gin.Engine) {
 	g := r.Group("/api/chats")
 
-	// TODO require auth
 	g.POST("/create", cs.createChat)
-	// TODO require auth
 	g.POST("/addmessage", cs.addMessage)
 }
 
@@ -34,8 +33,13 @@ func (cs *ChatsControllers) createChat(c *gin.Context) {
 	}
 	var res *models.Chat
 
-	// TODO get user id from JWT and use it as owner
-	if res, err = cs.ChatServicer.Create(chatData.ByHandle, &chatData); err != nil {
+	handle, err := extract(middleware.IDKey, c)
+	if err != nil {
+		c.AbortWithError(http.StatusUnauthorized, err)
+		return
+	}
+
+	if res, err = cs.ChatServicer.Create(handle, &chatData); err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
@@ -51,8 +55,13 @@ func (cs *ChatsControllers) addMessage(c *gin.Context) {
 		return
 	}
 
-	// TODO get user id from JWT
-	user, err := cs.UserServicer.ByHandle(newMessage.OwnerHandle)
+	handle, err := extract(middleware.IDKey, c)
+	if err != nil {
+		c.AbortWithError(http.StatusUnauthorized, err)
+		return
+	}
+
+	user, err := cs.UserServicer.ByHandle(handle)
 	if err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return

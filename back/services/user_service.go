@@ -70,7 +70,9 @@ func (us *UserService) Login(userData *models.PostUser) (string, error) {
 		if user.PasswordHash != userData.Password {
 			return "", errors.New("failed to login")
 		}
+
 		// TODO return actual jwt token
+
 		return "jwt token", nil
 	}
 	return "", errors.New("failed to login")

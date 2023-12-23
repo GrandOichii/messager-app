@@ -1,8 +1,6 @@
 package router
 
 import (
-	"log"
-
 	"github.com/GrandOichii/messager-app/back/controllers"
 	"github.com/GrandOichii/messager-app/back/middleware"
 	"github.com/GrandOichii/messager-app/back/services"
@@ -14,9 +12,8 @@ var (
 	chatServicer services.ChatServicer
 
 	controllers_ []controllers.Controller
-	middleware_  []middleware.Middleware = []middleware.Middleware{
-		&middleware.JwtMiddleware{},
-	}
+
+	auth = middleware.CreateJwtMiddleware()
 )
 
 func CreateRouter() *gin.Engine {
@@ -24,25 +21,16 @@ func CreateRouter() *gin.Engine {
 
 	configServices(res)
 	createControllers()
-	configMiddleware(res)
 	configMappings(res)
 
 	return res
-}
-
-func configMiddleware(r *gin.Engine) {
-	for _, mid := range middleware_ {
-		err := mid.Apply(r)
-		if err != nil {
-			log.Fatal(err.Error())
-		}
-	}
 }
 
 func createControllers() {
 	controllers_ = []controllers.Controller{
 		&controllers.UsersController{
 			UserServicer: userServicer,
+			Auth:         auth,
 		},
 		&controllers.ChatsControllers{
 			UserServicer: userServicer,

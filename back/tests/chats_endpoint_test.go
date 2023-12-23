@@ -1,20 +1,25 @@
 package tests
 
 import (
+	"net/http"
 	"testing"
 
 	"github.com/GrandOichii/messager-app/back/models"
 	"github.com/GrandOichii/messager-app/back/router"
+	"github.com/stretchr/testify/assert"
 )
 
-func Test(t *testing.T) {
+func Test_CreateChat(t *testing.T) {
 	r := router.CreateRouter()
-	loginAs(r, t, "coolhandle", "mymail@mail.com", "1234")
-	createUser(r, t, "another", "other@mail.com", "pass")
+	token := loginAs(r, t, "coolhandle", "mymail@mail.com", "1234")
+	t.Log(token)
+	otherHandle := "another"
+	createUser(r, t, otherHandle, "other@mail.com", "pass")
 
-	w, _ := req(r, t, "POST", "/api/users/login", models.PostUser{
-		Email:    "mymail@mail.com",
-		Password: "1234",
+	w, _ := req(r, t, "POST", "/api/chats/create", models.CreateChat{
+		WithHandle: otherHandle,
 	})
 
+	t.Logf("%v\n", w.Header())
+	assert.Equal(t, http.StatusCreated, w.Code)
 }

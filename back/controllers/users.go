@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/GrandOichii/messager-app/back/middleware"
@@ -14,6 +13,7 @@ type UsersController struct {
 	Controller
 
 	UserServicer services.UserServicer
+	Auth         middleware.Middleware
 }
 
 func (uc *UsersController) Map(r *gin.Engine) {
@@ -26,12 +26,11 @@ func (uc *UsersController) Map(r *gin.Engine) {
 }
 
 func (uc *UsersController) getUsers(c *gin.Context) {
-	username, err := extract(middleware.IDKey, c)
+	_, err := extract(middleware.IDKey, c)
 	if err != nil {
 		c.AbortWithError(http.StatusUnauthorized, err)
 		return
 	}
-	fmt.Printf("username: %v\n", username)
 
 	c.JSON(http.StatusOK, uc.UserServicer.All())
 }

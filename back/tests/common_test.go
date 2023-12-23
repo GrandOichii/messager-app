@@ -46,7 +46,7 @@ func createUser(r *gin.Engine, t *testing.T, handle string, email string, passwo
 	})
 }
 
-func loginAs(r *gin.Engine, t *testing.T, handle string, email string, password string) {
+func loginAs(r *gin.Engine, t *testing.T, handle string, email string, password string) string {
 	createUser(r, t, handle, email, password)
 
 	_, data := req(r, t, "POST", "/api/users/login", models.PostUser{
@@ -59,4 +59,5 @@ func loginAs(r *gin.Engine, t *testing.T, handle string, email string, password 
 			c.Writer.Header().Set("Authorization", "Bearer "+string(data))
 		}
 	}())
+	return string(data)
 }

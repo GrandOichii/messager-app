@@ -16,8 +16,5 @@ func (c *Chat) HasParticipant(handle string) bool {
 }
 
 type CreateChat struct {
-	// TODO remove
-	ByHandle string `json:"by"`
-
 	WithHandle string `json:"with"`
 }

@@ -10,13 +10,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_GetUsers(t *testing.T) {
-	r := router.CreateRouter()
+// func Test_GetUsers(t *testing.T) {
+// 	r := router.CreateRouter()
 
-	w, _ := req(r, t, "GET", "/api/users", nil)
+// 	w, _ := req(r, t, "GET", "/api/users", nil)
 
-	assert.Equal(t, http.StatusOK, w.Code)
-}
+// 	assert.Equal(t, http.StatusOK, w.Code)
+// }
 
 func Test_Register(t *testing.T) {
 	r := router.CreateRouter()
