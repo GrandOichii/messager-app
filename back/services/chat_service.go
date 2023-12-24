@@ -30,6 +30,7 @@ func (cs *ChatService) ByID(chatID string) (*models.Chat, error) {
 }
 
 func (cs *ChatService) Create(owner string, chatData *models.CreateChat) (*models.Chat, error) {
+	// TODO add the chat to the other user
 	for _, chat := range cs.chats {
 		if chat.HasParticipant(chatData.WithHandle) {
 			// TODO return already existing chat?

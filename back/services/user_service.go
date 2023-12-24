@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/GrandOichii/messager-app/back/models"
+	"github.com/GrandOichii/messager-app/back/security"
 )
 
 type UserService struct {
@@ -46,12 +47,16 @@ func (us *UserService) Register(newUser *models.CreateUser) (*models.GetUser, er
 		}
 	}
 
+	passHash, err := security.HashPassword(newUser.Password)
+	if err != nil {
+		return nil, err
+	}
+
 	res := &models.User{
 		Handle: newUser.Handle,
 		// TODO hash email
-		EmailHash: newUser.Email,
-		// TODO hash password
-		PasswordHash: newUser.Password,
+		EmailHash:    newUser.Email,
+		PasswordHash: passHash,
 	}
 
 	us.users = append(us.users, res)
@@ -65,8 +70,7 @@ func (us *UserService) Login(userData *models.LoginUser) (*models.User, error) {
 			continue
 		}
 
-		// TODO add password hash check
-		if user.PasswordHash != userData.Password {
+		if !security.CheckPasswordHash(userData.Password, user.PasswordHash) {
 			return nil, errors.New("failed to login")
 		}
 

@@ -72,7 +72,7 @@ func (r *Router) configServices(e *gin.Engine) {
 		panic(err)
 	}
 
-	// r.UserServicer = services.NewUserService()
+	// r.Services.UserServicer = services.NewUserService()
 	// r.Services.ChatServicer = services.NewChatService(r.Services.UserServicer)
 	r.Services.UserServicer = services.NewUserDBService(client)
 	r.Services.ChatServicer = services.NewChatDBService(client, r.Services)

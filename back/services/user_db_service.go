@@ -3,10 +3,10 @@ package services
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/GrandOichii/messager-app/back/constants"
 	"github.com/GrandOichii/messager-app/back/models"
+	"github.com/GrandOichii/messager-app/back/security"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -72,12 +72,16 @@ func (us *UserDBService) Register(newUser *models.CreateUser) (*models.GetUser, 
 		return nil, errors.New("user with handle " + newUser.Handle + " already exists")
 	}
 
+	passHash, err := security.HashPassword(newUser.Password)
+	if err != nil {
+		return nil, err
+	}
+
 	res := &models.User{
 		Handle: newUser.Handle,
 		// TODO hash email
-		EmailHash: newUser.Email,
-		// TODO hash password
-		PasswordHash: newUser.Password,
+		EmailHash:    newUser.Email,
+		PasswordHash: passHash,
 	}
 
 	_, err = us.dbClient.Database(constants.DB_NAME).Collection(USERS_COLLECTION).InsertOne(context.TODO(), res)
@@ -95,7 +99,6 @@ func (us *UserDBService) Login(userData *models.LoginUser) (*models.User, error)
 	cursor := us.dbClient.Database(constants.DB_NAME).Collection(USERS_COLLECTION).FindOne(context.TODO(), bson.D{
 		{Key: "emailhash", Value: userData.Email},
 	})
-	fmt.Printf("userData.Email: %v\n", userData.Email)
 
 	var result models.User
 	err := cursor.Decode(&result)
@@ -106,8 +109,7 @@ func (us *UserDBService) Login(userData *models.LoginUser) (*models.User, error)
 		panic(err)
 	}
 
-	// TODO check password hash
-	if result.PasswordHash != userData.Password {
+	if !security.CheckPasswordHash(userData.Password, result.PasswordHash) {
 		return nil, loginFailedErr
 	}
 

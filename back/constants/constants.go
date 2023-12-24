@@ -1,5 +1,5 @@
 package constants
 
 const (
-	DB_NAME = "messager"
+	DB_NAME = "messagerdb-dev"
 )

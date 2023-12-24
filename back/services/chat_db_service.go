@@ -46,6 +46,7 @@ func (cs *ChatDBService) ByID(chatID string) (*models.Chat, error) {
 }
 
 func (cs *ChatDBService) Create(owner string, chatData *models.CreateChat) (*models.Chat, error) {
+	// TODO add the chat to the other user
 
 	other, err := cs.services.UserServicer.ByHandle(chatData.WithHandle)
 	if err != nil {
