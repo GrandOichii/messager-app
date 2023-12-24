@@ -51,34 +51,27 @@ func (us *UserDBService) All() ([]*models.GetUser, error) {
 }
 
 func (us *UserDBService) ByHandle(handle string) (*models.User, error) {
-	for _, user := range us.users {
-		if user.Handle == handle {
-			return user, nil
+	cursor := us.dbClient.Database(constants.DB_NAME).Collection(COLLECTION).FindOne(context.TODO(), bson.D{
+		{Key: "handle", Value: handle},
+	})
+
+	var result models.User
+	err := cursor.Decode(&result)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, errors.New("no user with handle " + handle)
 		}
+		panic(err)
 	}
-	return nil, errors.New("no user with handle " + handle)
+	return &result, nil
 }
 
 func (us *UserDBService) Register(newUser *models.CreateUser) (*models.GetUser, error) {
-	cursor, err := us.dbClient.Database(constants.DB_NAME).Collection(COLLECTION).Find(context.TODO(), bson.D{
-		{Key: "handle", Value: newUser.Handle},
-	})
-	if err != nil {
-		return nil, err
-	}
+	_, err := us.ByHandle(newUser.Handle)
 
-	var users []*models.User
-	if err = cursor.All(context.TODO(), &users); err != nil {
-		return nil, err
+	if err == nil {
+		return nil, errors.New("user with handle " + newUser.Handle + " already exists")
 	}
-
-	if len(users) > 0 {
-		return nil, errors.New("User with handle " + newUser.Handle + " already exists")
-	}
-
-	// if err != nil {
-	// 	return nil, err
-	// }
 
 	res := &models.User{
 		Handle: newUser.Handle,
@@ -97,18 +90,26 @@ func (us *UserDBService) Register(newUser *models.CreateUser) (*models.GetUser, 
 }
 
 func (us *UserDBService) Login(userData *models.LoginUser) (*models.User, error) {
-	for _, user := range us.users {
-		// TODO add email hash check
-		if user.EmailHash != userData.Email {
-			continue
-		}
+	loginFailedErr := errors.New("failed to login")
 
-		// TODO add password hash check
-		if user.PasswordHash != userData.Password {
-			return nil, errors.New("failed to login")
-		}
+	// TODO use hashed email
+	cursor := us.dbClient.Database(constants.DB_NAME).Collection(COLLECTION).FindOne(context.TODO(), bson.D{
+		{Key: "email", Value: userData.Email},
+	})
 
-		return user, nil
+	var result models.User
+	err := cursor.Decode(&result)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, loginFailedErr
+		}
+		panic(err)
 	}
-	return nil, errors.New("failed to login")
+
+	// TODO check password hash
+	if result.PasswordHash != userData.Password {
+		return nil, loginFailedErr
+	}
+
+	return &result, nil
 }

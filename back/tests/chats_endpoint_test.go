@@ -10,6 +10,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// TODO replace the db services with basic services
+
 func Test_CreateChat(t *testing.T) {
 	r := router.CreateRouter()
 	token := loginAs(r, t, "coolhandle", "mymail@mail.com", "1234")

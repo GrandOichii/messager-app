@@ -10,6 +10,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// TODO replace the db services with basic services
+
 // func Test_GetUsers(t *testing.T) {
 // 	r := router.CreateRouter()
 

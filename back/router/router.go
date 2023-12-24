@@ -58,7 +58,6 @@ func configMappings(r *gin.Engine) {
 }
 
 func configServices(r *gin.Engine) {
-	// userServicer = services.NewUserService()
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
 	opts := options.Client().ApplyURI("mongodb://localhost:27017").SetServerAPIOptions(serverAPI)
 
@@ -67,6 +66,7 @@ func configServices(r *gin.Engine) {
 		panic(err)
 	}
 
+	// userServicer = services.NewUserService()
 	userServicer = services.NewUserDBService(client)
 	chatServicer = services.NewChatService(userServicer)
 }
