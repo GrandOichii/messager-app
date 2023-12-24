@@ -54,12 +54,18 @@ func (cs *ChatDBService) Create(owner string, chatData *models.CreateChat) (*mod
 		return nil, err
 	}
 
-	// for _, chat := range cs.chats {
-	// 	if chat.HasParticipant(chatData.WithHandle) {
-	// 		// TODO return already existing chat?
-	// 		return nil, errors.New("chat with " + chatData.WithHandle + " already exists")
-	// 	}
-	// }
+	cursor := cs.dbClient.Database(constants.DB_NAME).Collection(CHATS_COLLECTION).FindOne(context.TODO(), bson.D{
+		{Key: "participants", Value: chatData.WithHandle},
+	})
+
+	err = cursor.Err()
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			// TODO return already existing chat?
+			return nil, errors.New("chat with " + chatData.WithHandle + " already exists")
+		}
+		panic(err)
+	}
 
 	res := &models.Chat{
 		ParticipantHandles: []string{owner, other.Handle},
