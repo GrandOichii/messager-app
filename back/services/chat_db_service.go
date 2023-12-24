@@ -19,12 +19,10 @@ type ChatDBService struct {
 
 	services *Services
 	dbClient *mongo.Client
-	chats    []*models.Chat
 }
 
 func NewChatDBService(client *mongo.Client, services *Services) *ChatDBService {
 	return &ChatDBService{
-		chats:    []*models.Chat{},
 		services: services,
 		dbClient: client,
 	}
@@ -59,11 +57,9 @@ func (cs *ChatDBService) Create(owner string, chatData *models.CreateChat) (*mod
 	})
 
 	err = cursor.Err()
-	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			// TODO return already existing chat?
-			return nil, errors.New("chat with " + chatData.WithHandle + " already exists")
-		}
+	if err == nil {
+		return nil, errors.New("chat with " + chatData.WithHandle + " already exists")
+	} else if err != mongo.ErrNoDocuments {
 		panic(err)
 	}
 
@@ -91,7 +87,11 @@ func (cs *ChatDBService) AddMessage(owner *models.User, chat *models.Chat, newMe
 		return nil, err
 	}
 
-	chat.Messages = append(chat.Messages, message)
+	cs.dbClient.Database(constants.DB_NAME).Collection(CHATS_COLLECTION).UpdateByID(context.TODO(), chat.ID, bson.D{
+		{Key: "$push", Value: bson.D{
+			{Key: "messages", Value: message},
+		}},
+	})
 
 	return message, nil
 }
