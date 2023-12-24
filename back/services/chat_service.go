@@ -37,7 +37,6 @@ func (cs *ChatService) Create(owner string, chatData *models.CreateChat) (*model
 		}
 	}
 
-	// TODO check that a user with the handle actually exists
 	other, err := cs.services.UserServicer.ByHandle(chatData.WithHandle)
 	if err != nil {
 		return nil, err

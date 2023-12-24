@@ -1,18 +1,24 @@
 package tests
 
-// TODO replace the db services with basic services
+import (
+	"net/http"
+	"testing"
 
-// func Test_CreateChat(t *testing.T) {
-// 	r := router.CreateRouter().Engine
-// 	token := loginAs(r, t, "coolhandle", "mymail@mail.com", "1234")
-// 	otherHandle := "another"
-// 	createUser(r, t, otherHandle, "other@mail.com", "pass")
+	"github.com/GrandOichii/messager-app/back/models"
+	"github.com/stretchr/testify/assert"
+)
 
-// 	w, _ := req(r, t, "POST", "/api/chats/create", models.CreateChat{
-// 		WithHandle: otherHandle,
-// 	}, token)
-// 	assert.Equal(t, http.StatusCreated, w.Code)
-// }
+func Test_CreateChat(t *testing.T) {
+	r := createRouter().Engine
+	token := loginAs(r, t, "coolhandle", "mymail@mail.com", "1234")
+	otherHandle := "another"
+	createUser(r, t, otherHandle, "other@mail.com", "pass")
+
+	w, _ := req(r, t, "POST", "/api/chats/create", models.CreateChat{
+		WithHandle: otherHandle,
+	}, token)
+	assert.Equal(t, http.StatusCreated, w.Code)
+}
 
 // func Test_CreateChat_Failed(t *testing.T) {
 // 	r := router.CreateRouter().Engine

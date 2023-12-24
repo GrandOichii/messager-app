@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/GrandOichii/messager-app/back/constants"
 	"github.com/GrandOichii/messager-app/back/models"
@@ -11,7 +12,7 @@ import (
 )
 
 const (
-	COLLECTION = "users"
+	USERS_COLLECTION = "users"
 )
 
 type UserDBService struct {
@@ -35,7 +36,7 @@ func toGetUserArr(arr []*models.User) []*models.GetUser {
 }
 
 func (us *UserDBService) All() ([]*models.GetUser, error) {
-	cursor, err := us.dbClient.Database(constants.DB_NAME).Collection(COLLECTION).Find(context.TODO(), bson.D{})
+	cursor, err := us.dbClient.Database(constants.DB_NAME).Collection(USERS_COLLECTION).Find(context.TODO(), bson.D{})
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +50,7 @@ func (us *UserDBService) All() ([]*models.GetUser, error) {
 }
 
 func (us *UserDBService) ByHandle(handle string) (*models.User, error) {
-	cursor := us.dbClient.Database(constants.DB_NAME).Collection(COLLECTION).FindOne(context.TODO(), bson.D{
+	cursor := us.dbClient.Database(constants.DB_NAME).Collection(USERS_COLLECTION).FindOne(context.TODO(), bson.D{
 		{Key: "handle", Value: handle},
 	})
 
@@ -79,7 +80,7 @@ func (us *UserDBService) Register(newUser *models.CreateUser) (*models.GetUser, 
 		PasswordHash: newUser.Password,
 	}
 
-	_, err = us.dbClient.Database(constants.DB_NAME).Collection(COLLECTION).InsertOne(context.TODO(), res)
+	_, err = us.dbClient.Database(constants.DB_NAME).Collection(USERS_COLLECTION).InsertOne(context.TODO(), res)
 	if err != nil {
 		return nil, err
 	}
@@ -91,9 +92,10 @@ func (us *UserDBService) Login(userData *models.LoginUser) (*models.User, error)
 	loginFailedErr := errors.New("failed to login")
 
 	// TODO use hashed email
-	cursor := us.dbClient.Database(constants.DB_NAME).Collection(COLLECTION).FindOne(context.TODO(), bson.D{
-		{Key: "email", Value: userData.Email},
+	cursor := us.dbClient.Database(constants.DB_NAME).Collection(USERS_COLLECTION).FindOne(context.TODO(), bson.D{
+		{Key: "emailhash", Value: userData.Email},
 	})
+	fmt.Printf("userData.Email: %v\n", userData.Email)
 
 	var result models.User
 	err := cursor.Decode(&result)
