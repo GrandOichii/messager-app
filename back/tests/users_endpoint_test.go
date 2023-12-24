@@ -2,18 +2,18 @@ package tests
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"testing"
 
 	"github.com/GrandOichii/messager-app/back/models"
-	"github.com/GrandOichii/messager-app/back/router"
 	"github.com/stretchr/testify/assert"
 )
 
 // TODO replace the db services with basic services
 
 // func Test_GetUsers(t *testing.T) {
-// 	r := router.CreateRouter()
+// 	r := createRouter().Engine
 
 // 	w, _ := req(r, t, "GET", "/api/users", nil)
 
@@ -21,7 +21,7 @@ import (
 // }
 
 func Test_Register(t *testing.T) {
-	r := router.CreateRouter()
+	r := createRouter().Engine
 
 	handle := "coolhandle"
 	w, data := req(r, t, "POST", "/api/users/register", models.CreateUser{
@@ -68,7 +68,7 @@ func Test_RegisterFail(t *testing.T) {
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			r := router.CreateRouter()
+			r := createRouter().Engine
 			w, _ := req(r, t, "POST", "/api/users/register", tC, "")
 			assert.Equal(t, http.StatusBadRequest, w.Code)
 		})
@@ -76,24 +76,24 @@ func Test_RegisterFail(t *testing.T) {
 }
 
 func Test_Login(t *testing.T) {
-	r := router.CreateRouter()
+	r := createRouter().Engine
 	req(r, t, "POST", "/api/users/register", models.CreateUser{
 		Email:    "mymail@mail.com",
 		Password: "1234",
 		Handle:   "coolhandle",
 	}, "")
 
-	w, _ := req(r, t, "POST", "/api/users/login", models.LoginUser{
+	w, data := req(r, t, "POST", "/api/users/login", models.LoginUser{
 		Email:    "mymail@mail.com",
 		Password: "1234",
 	}, "")
-
+	fmt.Printf("string(data): %v\n", string(data))
 	assert.Equal(t, http.StatusOK, w.Code)
 
 }
 
 func Test_LoginFailed(t *testing.T) {
-	r := router.CreateRouter()
+	r := createRouter().Engine
 	req(r, t, "POST", "/api/users/register", models.CreateUser{
 		Email:    "mymail@mail.com",
 		Password: "1234",

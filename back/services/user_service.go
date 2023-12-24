@@ -18,12 +18,12 @@ func NewUserService() *UserService {
 	}
 }
 
-func (us *UserService) All() []*models.GetUser {
+func (us *UserService) All() ([]*models.GetUser, error) {
 	res := make([]*models.GetUser, len(us.users))
 	for i, user := range us.users {
 		res[i] = user.ToGetUser()
 	}
-	return res
+	return res, nil
 }
 
 func (us *UserService) ByHandle(handle string) (*models.User, error) {

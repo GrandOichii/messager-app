@@ -17,13 +17,13 @@ const (
 type JwtMiddleware struct {
 	Middleware
 
-	UserService services.UserServicer
+	Services *services.Services
 
 	// AuthMiddleware
 	Middle *jwt.GinJWTMiddleware
 }
 
-func CreateJwtMiddleware(uService services.UserServicer) *JwtMiddleware {
+func CreateJwtMiddleware(services *services.Services) *JwtMiddleware {
 
 	authMiddleware, err := jwt.New(&jwt.GinJWTMiddleware{
 		Realm: "test zone",
@@ -57,7 +57,7 @@ func CreateJwtMiddleware(uService services.UserServicer) *JwtMiddleware {
 			// userID := loginVals.Email
 			// password := loginVals.Password
 
-			result, err := uService.Login(&loginVals)
+			result, err := services.UserServicer.Login(&loginVals)
 			if err != nil {
 				return nil, jwt.ErrFailedAuthentication
 			}

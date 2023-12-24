@@ -9,6 +9,8 @@ import (
 	"testing"
 
 	"github.com/GrandOichii/messager-app/back/models"
+	"github.com/GrandOichii/messager-app/back/router"
+	"github.com/GrandOichii/messager-app/back/services"
 	"github.com/gin-gonic/gin"
 )
 
@@ -63,4 +65,13 @@ func loginAs(r *gin.Engine, t *testing.T, handle string, email string, password 
 	json.Unmarshal(data, &res)
 
 	return res.Token
+}
+
+func createRouter() *router.Router {
+	result := router.CreateRouter()
+
+	result.Services.UserServicer = services.NewUserService()
+	result.Services.ChatServicer = services.NewChatService(result.Services)
+
+	return result
 }

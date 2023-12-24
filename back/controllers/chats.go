@@ -12,9 +12,10 @@ import (
 type ChatsControllers struct {
 	Controller
 
-	UserServicer services.UserServicer
-	ChatServicer services.ChatServicer
-	Auth         middleware.Middleware
+	// UserServicer services.UserServicer
+	// ChatServicer services.ChatServicer
+	Services *services.Services
+	Auth     middleware.Middleware
 }
 
 func (cs *ChatsControllers) Map(r *gin.Engine) {
@@ -42,7 +43,7 @@ func (cs *ChatsControllers) createChat(c *gin.Context) {
 		return
 	}
 
-	if res, err = cs.ChatServicer.Create(handle, &chatData); err != nil {
+	if res, err = cs.Services.ChatServicer.Create(handle, &chatData); err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
@@ -65,19 +66,19 @@ func (cs *ChatsControllers) addMessage(c *gin.Context) {
 		return
 	}
 
-	user, err := cs.UserServicer.ByHandle(handle)
+	user, err := cs.Services.UserServicer.ByHandle(handle)
 	if err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 
-	chat, err := cs.ChatServicer.ByID(newMessage.ChatID)
+	chat, err := cs.Services.ChatServicer.ByID(newMessage.ChatID)
 	if err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 
-	res, err := cs.ChatServicer.AddMessage(user, chat, &newMessage)
+	res, err := cs.Services.ChatServicer.AddMessage(user, chat, &newMessage)
 	if err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return

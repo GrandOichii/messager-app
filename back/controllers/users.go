@@ -12,8 +12,9 @@ import (
 type UsersController struct {
 	Controller
 
-	UserServicer services.UserServicer
-	Auth         *middleware.JwtMiddleware
+	// UserServicer services.UserServicer
+	Services *services.Services
+	Auth     *middleware.JwtMiddleware
 }
 
 func (uc *UsersController) Map(r *gin.Engine) {
@@ -32,7 +33,7 @@ func (uc *UsersController) getUsers(c *gin.Context) {
 	// 	return
 	// }
 
-	users, err := uc.UserServicer.All()
+	users, err := uc.Services.UserServicer.All()
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, err)
 		return
@@ -57,7 +58,7 @@ func (uc *UsersController) registerUser(c *gin.Context) {
 	}
 
 	var newUser *models.GetUser
-	if newUser, err = uc.UserServicer.Register(&userData); err != nil {
+	if newUser, err = uc.Services.UserServicer.Register(&userData); err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}

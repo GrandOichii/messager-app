@@ -11,53 +11,59 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var (
-	userServicer services.UserServicer
-	chatServicer services.ChatServicer
+type Router struct {
+	Engine   *gin.Engine
+	Services *services.Services
 
-	controllers_ []controllers.Controller
+	controllers []controllers.Controller
 
 	auth *middleware.JwtMiddleware
-)
+}
 
-func CreateRouter() *gin.Engine {
+func CreateRouter() *Router {
 	res := gin.Default()
+	result := Router{
+		Engine:   res,
+		Services: &services.Services{},
+	}
 
-	configServices(res)
-	configMiddleware()
-	createControllers()
+	result.configServices(res)
+	result.configMiddleware()
+	result.createControllers()
 
-	configMappings(res)
+	result.configMappings(res)
 
-	return res
+	return &result
 }
 
-func configMiddleware() {
-	auth = middleware.CreateJwtMiddleware(userServicer)
+func (r *Router) configMiddleware() {
+	r.auth = middleware.CreateJwtMiddleware(r.Services)
 }
 
-func createControllers() {
-	controllers_ = []controllers.Controller{
+func (r *Router) createControllers() {
+	r.controllers = []controllers.Controller{
 		&controllers.UsersController{
-			UserServicer: userServicer,
-			Auth:         auth,
+			Services: r.Services,
+			// UserServicer: r.UserServicer,
+			Auth: r.auth,
 		},
 		&controllers.ChatsControllers{
-			UserServicer: userServicer,
-			ChatServicer: chatServicer,
-			Auth:         auth,
+			Services: r.Services,
+			// UserServicer: r.UserServicer,
+			// ChatServicer: r.ChatServicer,
+			Auth: r.auth,
 		},
 	}
 }
 
-func configMappings(r *gin.Engine) {
-	for _, controller := range controllers_ {
-		controller.Map(r)
+func (r *Router) configMappings(e *gin.Engine) {
+	for _, controller := range r.controllers {
+		controller.Map(e)
 	}
 
 }
 
-func configServices(r *gin.Engine) {
+func (r *Router) configServices(e *gin.Engine) {
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
 	opts := options.Client().ApplyURI("mongodb://localhost:27017").SetServerAPIOptions(serverAPI)
 
@@ -66,7 +72,8 @@ func configServices(r *gin.Engine) {
 		panic(err)
 	}
 
-	// userServicer = services.NewUserService()
-	userServicer = services.NewUserDBService(client)
-	chatServicer = services.NewChatService(userServicer)
+	// r.UserServicer = services.NewUserService()
+	// r.Services.ChatServicer = services.NewChatService(r.Services.UserServicer)
+	r.Services.UserServicer = services.NewUserDBService(client)
+	r.Services.ChatServicer = services.NewChatDBService(client, r.Services)
 }

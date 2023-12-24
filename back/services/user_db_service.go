@@ -18,13 +18,11 @@ type UserDBService struct {
 	UserServicer
 
 	dbClient *mongo.Client
-	users    []*models.User
 }
 
 func NewUserDBService(dbClient *mongo.Client) *UserDBService {
 	return &UserDBService{
 		dbClient: dbClient,
-		users:    []*models.User{},
 	}
 }
 

@@ -4,23 +4,24 @@ import (
 	"errors"
 
 	"github.com/GrandOichii/messager-app/back/models"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type ChatService struct {
+type ChatDBService struct {
 	ChatServicer
 
 	services *Services
 	chats    []*models.Chat
 }
 
-func NewChatService(services *Services) *ChatService {
-	return &ChatService{
+func NewChatDBService(client *mongo.Client, services *Services) *ChatDBService {
+	return &ChatDBService{
 		chats:    []*models.Chat{},
 		services: services,
 	}
 }
 
-func (cs *ChatService) ByID(chatID string) (*models.Chat, error) {
+func (cs *ChatDBService) ByID(chatID string) (*models.Chat, error) {
 	for _, chat := range cs.chats {
 		if chat.ID == chatID {
 			return chat, nil
@@ -29,7 +30,7 @@ func (cs *ChatService) ByID(chatID string) (*models.Chat, error) {
 	return nil, errors.New("chat with ID " + chatID + " not found")
 }
 
-func (cs *ChatService) Create(owner string, chatData *models.CreateChat) (*models.Chat, error) {
+func (cs *ChatDBService) Create(owner string, chatData *models.CreateChat) (*models.Chat, error) {
 	for _, chat := range cs.chats {
 		if chat.HasParticipant(chatData.WithHandle) {
 			// TODO return already existing chat?
@@ -52,7 +53,7 @@ func (cs *ChatService) Create(owner string, chatData *models.CreateChat) (*model
 	return res, nil
 }
 
-func (cs *ChatService) AddMessage(owner *models.User, chat *models.Chat, newMessage *models.PostMessage) (*models.Message, error) {
+func (cs *ChatDBService) AddMessage(owner *models.User, chat *models.Chat, newMessage *models.PostMessage) (*models.Message, error) {
 	message := &models.Message{
 		Text:        newMessage.Text,
 		OwnerHandle: owner.Handle,
