@@ -1,9 +1,11 @@
 package models
 
+import "go.mongodb.org/mongo-driver/bson/primitive"
+
 type Chat struct {
-	ID                 string     `json:"_id"`
-	ParticipantHandles []string   `json:"participants"`
-	Messages           []*Message `json:"messages"`
+	ID                 primitive.ObjectID `json:"id" bson:"_id"`
+	ParticipantHandles []string           `json:"participants" bson:"participants"`
+	Messages           []*Message         `json:"messages" bson:"messages"`
 }
 
 func (c *Chat) HasParticipant(handle string) bool {
@@ -13,6 +15,20 @@ func (c *Chat) HasParticipant(handle string) bool {
 		}
 	}
 	return false
+}
+
+func (c *Chat) ToGetChat() *GetChat {
+	return &GetChat{
+		ID:                 c.ID.Hex(),
+		ParticipantHandles: c.ParticipantHandles,
+		Messages:           c.Messages,
+	}
+}
+
+type GetChat struct {
+	ID                 string     `json:"id"`
+	ParticipantHandles []string   `json:"participants"`
+	Messages           []*Message `json:"messages"`
 }
 
 type CreateChat struct {

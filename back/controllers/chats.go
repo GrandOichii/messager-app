@@ -48,7 +48,7 @@ func (cs *ChatsControllers) createChat(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, res)
+	c.JSON(http.StatusCreated, res.ToGetChat())
 	// c.JSON(http.StatusCreated, gin.H{})
 }
 

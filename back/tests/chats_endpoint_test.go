@@ -62,7 +62,7 @@ func Test_SendMessage(t *testing.T) {
 	checkErr(t, err)
 
 	w, _ := req(r, t, "POST", "/api/chats/addmessage", models.PostMessage{
-		ChatID: chat.ID,
+		ChatID: chat.ID.Hex(),
 		Text:   "Hello, world!",
 	}, token)
 
@@ -106,7 +106,7 @@ func Test_SendMessage_NoMessage(t *testing.T) {
 	checkErr(t, err)
 
 	w, _ := req(r, t, "POST", "/api/chats/addmessage", models.PostMessage{
-		ChatID: chat.ID,
+		ChatID: chat.ID.Hex(),
 		Text:   "",
 	}, token)
 

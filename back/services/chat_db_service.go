@@ -31,12 +31,16 @@ func NewChatDBService(client *mongo.Client, services *Services) *ChatDBService {
 
 func (cs *ChatDBService) ByID(chatID string) (*models.Chat, error) {
 	// TODO add message pages
+	id, err := primitive.ObjectIDFromHex(chatID)
+	if err != nil {
+		return nil, err
+	}
 	cursor := cs.dbClient.Database(constants.DB_NAME).Collection(CHATS_COLLECTION).FindOne(context.TODO(), bson.D{
-		{Key: "_id", Value: chatID},
+		{Key: "_id", Value: id},
 	})
 
 	var result models.Chat
-	err := cursor.Decode(&result)
+	err = cursor.Decode(&result)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, errors.New("no chat with id " + chatID)
@@ -65,10 +69,14 @@ func (cs *ChatDBService) Create(owner string, chatData *models.CreateChat) (*mod
 		panic(err)
 	}
 
-	chat := &models.Chat{
-		ParticipantHandles: []string{owner, other.Handle},
-		Messages:           []*models.Message{},
+	chat := bson.D{
+		{Key: "participants", Value: []string{owner, other.Handle}},
+		{Key: "messages", Value: []interface{}{}},
 	}
+	// chat := &models.Chat{
+	// 	ParticipantHandles: []string{owner, other.Handle},
+	// 	Messages:           []*models.Message{},
+	// }
 
 	inRes, err := cs.dbClient.Database(constants.DB_NAME).Collection(CHATS_COLLECTION).InsertOne(context.TODO(), chat)
 	if err != nil {
@@ -93,11 +101,13 @@ func (cs *ChatDBService) Create(owner string, chatData *models.CreateChat) (*mod
 			panic(err)
 		}
 		if uRes.ModifiedCount == 0 {
-			panic(errors.New("user with handle " + userHandle + " was not updated on creating chat with id " + chatID.String() + " because they were not found"))
+			panic(errors.New("user with handle " + userHandle + " was not updated on creating chat with id " + chatID.Hex() + " because they were not found"))
 		}
 	}
 
-	return chat, nil
+	result, err := cs.ByID(chatID.Hex())
+
+	return result, err
 }
 
 func (cs *ChatDBService) AddMessage(owner *models.User, chat *models.Chat, newMessage *models.PostMessage) (*models.Message, error) {
@@ -110,7 +120,6 @@ func (cs *ChatDBService) AddMessage(owner *models.User, chat *models.Chat, newMe
 	if err != nil {
 		return nil, err
 	}
-
 	uRes, err := cs.dbClient.Database(constants.DB_NAME).Collection(CHATS_COLLECTION).UpdateByID(context.TODO(), chat.ID, bson.D{
 		{Key: "$push", Value: bson.D{
 			{Key: "messages", Value: message},
@@ -122,7 +131,7 @@ func (cs *ChatDBService) AddMessage(owner *models.User, chat *models.Chat, newMe
 	}
 
 	if uRes.ModifiedCount == 0 {
-		panic("failed to append message to chat with id " + chat.ID)
+		panic("failed to append message to chat with id " + chat.ID.Hex())
 	}
 
 	return message, nil

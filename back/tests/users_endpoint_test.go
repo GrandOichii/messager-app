@@ -2,7 +2,6 @@ package tests
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"testing"
 
@@ -81,11 +80,10 @@ func Test_Login(t *testing.T) {
 		Handle:   "coolhandle",
 	}, "")
 
-	w, data := req(r, t, "POST", "/api/users/login", models.LoginUser{
+	w, _ := req(r, t, "POST", "/api/users/login", models.LoginUser{
 		Email:    "mymail@mail.com",
 		Password: "1234",
 	}, "")
-	fmt.Printf("string(data): %v\n", string(data))
 	assert.Equal(t, http.StatusOK, w.Code)
 
 }

@@ -5,10 +5,10 @@ import "errors"
 // TODO move all DTOs to a separate folder
 
 type User struct {
-	Handle       string   `json:"handle"`
-	PasswordHash string   `json:"passhash"`
-	EmailHash    string   `json:"emailhash"`
-	ChatIDs      []string `json:"chat_ids"`
+	Handle       string   `json:"handle" bson:"handle"`
+	PasswordHash string   `json:"passhash" bson:"passhash"`
+	EmailHash    string   `json:"emailhash" bson:"emailhash"`
+	ChatIDs      []string `json:"chat_ids" bson:"chat_ids"`
 }
 
 func (u *User) ToGetUser() *GetUser {

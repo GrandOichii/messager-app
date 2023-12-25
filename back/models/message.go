@@ -3,8 +3,8 @@ package models
 import "errors"
 
 type Message struct {
-	OwnerHandle string `json:"uhandle"`
-	Text        string `json:"text"`
+	OwnerHandle string `json:"uhandle" bson:"uhandle"`
+	Text        string `json:"text" bson:"text"`
 }
 
 func (m *Message) CheckValid() error {

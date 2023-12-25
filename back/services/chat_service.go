@@ -22,7 +22,7 @@ func NewChatService(services *Services) *ChatService {
 
 func (cs *ChatService) ByID(chatID string) (*models.Chat, error) {
 	for _, chat := range cs.chats {
-		if chat.ID == chatID {
+		if chat.ID.Hex() == chatID {
 			return chat, nil
 		}
 	}
