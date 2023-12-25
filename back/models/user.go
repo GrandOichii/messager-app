@@ -8,7 +8,7 @@ type User struct {
 	Handle       string   `json:"handle"`
 	PasswordHash string   `json:"passhash"`
 	EmailHash    string   `json:"emailhash"`
-	ChatIDs      []string `json:"chats_ids"`
+	ChatIDs      []string `json:"chat_ids"`
 }
 
 func (u *User) ToGetUser() *GetUser {

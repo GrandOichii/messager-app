@@ -82,6 +82,7 @@ func (us *UserDBService) Register(newUser *models.CreateUser) (*models.GetUser, 
 		// TODO hash email
 		EmailHash:    newUser.Email,
 		PasswordHash: passHash,
+		ChatIDs:      []string{},
 	}
 
 	_, err = us.dbClient.Database(constants.DB_NAME).Collection(USERS_COLLECTION).InsertOne(context.TODO(), res)
