@@ -1,4 +1,4 @@
-import { Text, View } from "react-native"
+import { ScrollView, Text, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import styles from "../../styles/styles"
 import { useEffect, useState } from "react"
@@ -21,9 +21,11 @@ const ChatList = () => {
     }
     
     return <SafeAreaView style={{flex: 1, padding: 4}}>
-        {chatIDs.map(chatID => (
-            <ChatRow chatID={chatID} key={chatID} />
-        ))}
+        <ScrollView>
+            {chatIDs.map(chatID => (
+                <ChatRow chatID={chatID} key={chatID} />
+            ))}
+        </ScrollView>
     </SafeAreaView>
 }
 
