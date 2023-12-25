@@ -116,3 +116,12 @@ func (us *UserDBService) Login(userData *models.LoginUser) (*models.User, error)
 
 	return &result, nil
 }
+
+func (us *UserDBService) GetChatIDs(handle string) ([]string, error) {
+	user, err := us.ByHandle(handle)
+	if err != nil {
+		return nil, err
+	}
+
+	return user.ChatIDs, nil
+}

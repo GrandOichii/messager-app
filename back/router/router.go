@@ -2,10 +2,12 @@ package router
 
 import (
 	"context"
+	"time"
 
 	"github.com/GrandOichii/messager-app/back/controllers"
 	"github.com/GrandOichii/messager-app/back/middleware"
 	"github.com/GrandOichii/messager-app/back/services"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -22,6 +24,19 @@ type Router struct {
 
 func CreateRouter() *Router {
 	res := gin.Default()
+
+	res.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowMethods:     []string{"PUT", "PATCH", "POST", "GET", "DELETE"},
+		AllowHeaders:     []string{"Origin", "Authorization", "Content-Type", "Accept-Encoding"},
+		ExposeHeaders:    []string{"Content-Length", "Access-Control-Allow-Origin", "Access-Control-Allow-Credentials", "Access-Control-Allow-Headers", "Access-Control-Allow-Methods"},
+		AllowCredentials: true,
+		AllowOriginFunc: func(origin string) bool {
+			return true
+			// return origin == "http://localhost:3000"
+		},
+		MaxAge: 12 * time.Hour,
+	}))
 	result := Router{
 		Engine:   res,
 		Services: &services.Services{},

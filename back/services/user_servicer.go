@@ -9,4 +9,5 @@ type UserServicer interface {
 
 	Register(newUser *models.CreateUser) (*models.GetUser, error)
 	Login(user *models.LoginUser) (*models.User, error)
+	GetChatIDs(handle string) ([]string, error)
 }

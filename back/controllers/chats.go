@@ -22,6 +22,7 @@ func (cs *ChatsControllers) Map(r *gin.Engine) {
 	g := r.Group("/api/chats")
 
 	g.Use(cs.Auth.GetMiddlewareFunc())
+	g.GET("", cs.GetChatIDs)
 	g.POST("/create", cs.createChat)
 
 	g.POST("/addmessage", cs.addMessage)
@@ -85,4 +86,25 @@ func (cs *ChatsControllers) addMessage(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, res)
+}
+
+func (cs *ChatsControllers) GetChatIDs(c *gin.Context) {
+	handle, err := extract(middleware.IDKey, c)
+	if err != nil {
+		c.AbortWithError(http.StatusUnauthorized, err)
+		return
+	}
+
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	chatIDs, err := cs.Services.UserServicer.GetChatIDs(handle)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, chatIDs)
 }
