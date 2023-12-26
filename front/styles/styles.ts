@@ -26,16 +26,15 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     formTextInput: {
+        padding: 2,
         flex: 1,
         borderRadius: 4,
         borderColor: 'black',
-        backgroundColor: '#daf5f0',
         borderWidth: 2,
         borderRightWidth: 3,
         borderBottomWidth: 3
     },
     submit: {
-        backgroundColor: '#ff69b4',
         padding: 3,
         borderRadius: 4,
         borderColor: 'black',

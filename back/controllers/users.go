@@ -65,26 +65,3 @@ func (uc *UsersController) registerUser(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, newUser)
 }
-
-// func (uc *UsersController) loginUser(c *gin.Context) {
-// 	var userData models.LoginUser
-// 	var err error
-
-// 	if err = c.BindJSON(&userData); err != nil {
-// 		c.AbortWithError(http.StatusUnauthorized, err)
-// 		return
-// 	}
-
-// 	err = userData.CheckValid()
-// 	if err != nil {
-// 		c.AbortWithError(http.StatusUnauthorized, err)
-// 		return
-// 	}
-
-// 	var token string
-// 	if user, err = uc.UserServicer.Login(&userData); err != nil {
-// 		c.AbortWithError(http.StatusUnauthorized, err)
-// 		return
-// 	}
-// 	c.JSON(http.StatusOK, token)
-// }

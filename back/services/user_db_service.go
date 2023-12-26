@@ -72,6 +72,18 @@ func (us *UserDBService) Register(newUser *models.CreateUser) (*models.GetUser, 
 		return nil, errors.New("user with handle " + newUser.Handle + " already exists")
 	}
 
+	cursor := us.dbClient.Database(constants.DB_NAME).Collection(USERS_COLLECTION).FindOne(context.TODO(), bson.D{
+		{Key: "emailhash", Value: newUser.Email},
+	})
+
+	err = cursor.Err()
+	if err == nil {
+		return nil, errors.New("user with specified email " + newUser.Email + " already exists")
+	}
+	if !errors.Is(err, mongo.ErrNoDocuments) {
+		panic(err)
+	}
+
 	passHash, err := security.HashPassword(newUser.Password)
 	if err != nil {
 		return nil, err
