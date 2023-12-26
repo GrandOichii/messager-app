@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/GrandOichii/messager-app/back/middleware"
@@ -41,6 +42,11 @@ func (cs *ChatsControllers) createChat(c *gin.Context) {
 	handle, err := extract(middleware.IDKey, c)
 	if err != nil {
 		c.AbortWithError(http.StatusUnauthorized, err)
+		return
+	}
+
+	if handle == chatData.WithHandle {
+		c.AbortWithError(http.StatusBadRequest, errors.New("User with handle "+handle+" tried to create a chat with themselves"))
 		return
 	}
 

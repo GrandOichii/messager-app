@@ -88,7 +88,7 @@ const Login = (props: LoginProps) => {
 
     const canSubmit = () => !processing && handleButtonEnabled
 
-    const mapInputColor = (v: string) => v.length == 0 ? '#daf5f0' : '#ffa07a'
+    const mapInputColor = (v: string) => v.length === 0 ? '#daf5f0' : '#ffa07a'
 
     return <SafeAreaView style={styles.container}>
         <View style={[styles.loginForm, styles.border]}>

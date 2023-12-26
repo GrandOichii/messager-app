@@ -5,8 +5,9 @@ import { useEffect, useState } from 'react'
 import { getStored } from '../storage'
 import api from '../api'
 import ChatList from './components/chatlist'
+import Home from './components/home'
 
-const Home = () => {
+const Index = () => {
 
     const [loggedIn, setLoggedIn] = useState(false)
     
@@ -21,9 +22,12 @@ const Home = () => {
 
     useEffect(() => { checkLogin() }, [])
 
-    return loggedIn 
-        ? <ChatList /> 
-        : <Login onLogin={checkLogin} />
+    return <SafeAreaView style={{flex: 1}}>
+        { loggedIn 
+           ? <Home /> 
+           : <Login onLogin={checkLogin} />
+        }
+    </SafeAreaView>
 }
 
-export default Home
+export default Index

@@ -60,6 +60,14 @@ const styles = StyleSheet.create({
         margin: 1,
         padding: 2,
         // flex: 1,
+    },
+    button: {
+        borderRadius: 4,
+        borderColor: 'black',
+        borderWidth: 2,
+        borderRightWidth: 3,
+        borderBottomWidth: 3,
+        backgroundColor: '#e3a018'
     }
 })
 
