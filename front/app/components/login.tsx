@@ -20,7 +20,7 @@ const Login = (props: LoginProps) => {
     const [password, setPassword] = useState('pass')
     const [passwordError, setPasswordError] = useState('')
 
-    const [failed, setFailed] = useState(false)
+    const [failedLabel, setFailedLabel] = useState('')
     const [handleButtonEnabled, setHandleButtonEnabled] = useState(false)
 
     const [processing, setProcessing] = useState(false)
@@ -30,7 +30,7 @@ const Login = (props: LoginProps) => {
         // setEmail('')
         // setHandle('')
         // setPassword('')
-        setFailed(false)
+        setFailedLabel('')
     }
 
     new Array<[string, React.Dispatch<React.SetStateAction<string>>, RegExp]>(
@@ -51,9 +51,10 @@ const Login = (props: LoginProps) => {
     useEffect(resetForm, [isLogin])
 
     const handleSubmit = async () => {        
-        setFailed(false)
+        setFailedLabel('')
         setProcessing(true)
         
+        // TODO split register and login errors?
         try {
             if (!isLogin) {
                 const req = await api.post('/api/users/register', {
@@ -62,7 +63,13 @@ const Login = (props: LoginProps) => {
                     password: password,
                 })        
             }
-
+        } catch (e) {
+            setFailedLabel('register')
+            setProcessing(false)
+            return
+        }
+            
+        try {
             const req = await api.post('/api/users/login', {
                 email: email,
                 password: password,
@@ -71,7 +78,9 @@ const Login = (props: LoginProps) => {
             resetForm()
             props.onLogin()
         } catch (e) {
-            setFailed(true)
+            setFailedLabel('login')
+            setProcessing(false)
+            return
         }
         
         setProcessing(false)
@@ -120,9 +129,9 @@ const Login = (props: LoginProps) => {
             </TouchableOpacity>
 
             {
-                failed &&
+                failedLabel != '' &&
                 <View style={{flex:1, margin: 4, alignItems: 'center'}}>
-                    <Text style={{color: 'red'}}>Failed to { isLogin ? 'login' : 'register'}</Text>
+                    <Text style={{color: 'red'}}>Failed to {failedLabel}</Text>
                 </View>
             }
         </View>
