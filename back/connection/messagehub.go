@@ -15,7 +15,8 @@ type MessageHub interface {
 }
 
 type Client struct {
-	Handle string
+	Handle        string
+	Authenticated bool
 }
 
 type NotifyHub struct {
@@ -40,6 +41,7 @@ func NewNotifyHub() *NotifyHub {
 
 func (nh *NotifyHub) Run() {
 	for {
+
 		select {
 		case client := <-nh.register:
 			fmt.Println("Register request from " + client.Handle)
@@ -50,9 +52,25 @@ func (nh *NotifyHub) Run() {
 func (nh *NotifyHub) Register(handle string, chatID string, w http.ResponseWriter, r *http.Request) error {
 	// TODO
 	c := &Client{
-		Handle: handle,
+		Handle:        handle,
+		Authenticated: false,
 	}
 	nh.register <- c
+
+	conn, err := nh.upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		return err
+	}
+
+	// read jwt token
+	_, p, err := conn.ReadMessage()
+	if err != nil {
+		return err
+	}
+
+	// TODO check jwt token for validity
+	fmt.Printf("string(p): %v\n", string(p))
+
 	return nil
 }
 

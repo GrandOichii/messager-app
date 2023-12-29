@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import ChatList from "./chatlist"
 import ChatDisplay from "./chatdisplay"
 import api from "../../api"
+import { getStored } from "../../storage"
 
 const Home = () => {
     const [chatID, setChatID] = useState('')
@@ -16,10 +17,16 @@ const Home = () => {
             
             // const host = api.defaults.baseURL
             const host = 'localhost:8080'
-            const socket = new WebSocket(`ws://${host}/api/chats/listen/${chatID}`)
-            socket.onopen = () => {
-                console.log('connected!');
-                
+            const handle = 'myhandle'
+            const socket = new WebSocket(`ws://${host}/api/chats/listen?chatid=${chatID}&handle=${handle}`)
+            
+            socket.onopen = async () => {
+                const token = await getStored('jwt_token')
+                socket.send(token!)
+            }
+
+            socket.onclose = async (e) => {
+                console.error(e);
             }
         }
 

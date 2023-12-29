@@ -7,7 +7,7 @@
     <meta name='viewport' content='width=device-width, initial-scale=1'>
     <script>
         const handleClick = () => {
-            const socket = new WebSocket('ws://localhost:8080/ws')
+            const socket = new WebSocket('ws//localhost:8080/ws')
             socket.addEventListener('open', e => {
                 console.log('connected!');
                 socket.send('hello, server')

@@ -24,7 +24,7 @@ type ChatsControllers struct {
 func (cs *ChatsControllers) Map(r *gin.Engine) {
 	g := r.Group("/api/chats")
 
-	g.GET("/listen/:chatid", cs.ListenForMessages)
+	g.GET("/listen", cs.ListenForMessages)
 
 	gg := g.Group("")
 	gg.Use(cs.Auth.GetMiddlewareFunc())
@@ -119,19 +119,22 @@ func (cs *ChatsControllers) GetChatIDs(c *gin.Context) {
 
 func (cs *ChatsControllers) ListenForMessages(c *gin.Context) {
 	// TODO is exposing the chat id like that ok?
-	handle, err := extract(middleware.IDKey, c)
-	if err != nil {
-		c.AbortWithError(http.StatusUnauthorized, err)
-		return
-	}
+	var err error
+	// handle, err := extract(middleware.IDKey, c)
+	// if err != nil {
+	// 	c.AbortWithError(http.StatusUnauthorized, err)
+	// 	return
+	// }
 
-	chatID := c.Param("chatid")
+	// TODO check for validity
+	chatID := c.Query("chatid")
+	handle := c.Query("handle")
 
-	_, err = cs.Services.UserServicer.ByHandle(handle)
-	if err != nil {
-		// TODO only panic?
-		panic(err)
-	}
+	// _, err = cs.Services.UserServicer.ByHandle(handle)
+	// if err != nil {
+	// 	// TODO only panic?
+	// 	panic(err)
+	// }
 
 	err = cs.Hub.Register(handle, chatID, c.Writer, c.Request)
 	if err != nil {
