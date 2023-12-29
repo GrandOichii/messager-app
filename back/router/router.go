@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/GrandOichii/messager-app/back/connection"
 	"github.com/GrandOichii/messager-app/back/controllers"
 	"github.com/GrandOichii/messager-app/back/middleware"
 	"github.com/GrandOichii/messager-app/back/services"
@@ -67,6 +68,7 @@ func (r *Router) createControllers() {
 			// UserServicer: r.UserServicer,
 			// ChatServicer: r.ChatServicer,
 			Auth: r.auth,
+			Hub:  connection.NewNotifyHub(),
 		},
 	}
 }

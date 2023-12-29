@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
     },
     chatRow: {
         margin: 1,
-        padding: 2,
+        padding: 4,
         // flex: 1,
     },
     button: {

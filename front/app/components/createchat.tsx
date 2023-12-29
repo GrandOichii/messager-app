@@ -15,7 +15,6 @@ const CreateChat = (props: CreateChatProps) => {
     
     const handleCreate = async () => {
         try {
-            console.log(newChatHandle);
             
             const req = await api.post('/api/chats/create', {
                 with: newChatHandle
@@ -35,7 +34,7 @@ const CreateChat = (props: CreateChatProps) => {
                 @
             </Text>
             <TextInput 
-                // style={{flex: 1}}
+                style={{flex: 1}}
                 placeholderTextColor='#b5d2ad'
                 placeholder="Enter user handle"
                 onChangeText={setNewChatHandle}

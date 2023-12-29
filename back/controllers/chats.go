@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/GrandOichii/messager-app/back/connection"
 	"github.com/GrandOichii/messager-app/back/middleware"
 	"github.com/GrandOichii/messager-app/back/models"
 	"github.com/GrandOichii/messager-app/back/services"
@@ -17,16 +18,21 @@ type ChatsControllers struct {
 	// ChatServicer services.ChatServicer
 	Services *services.Services
 	Auth     middleware.Middleware
+	Hub      connection.MessageHub
 }
 
 func (cs *ChatsControllers) Map(r *gin.Engine) {
 	g := r.Group("/api/chats")
 
-	g.Use(cs.Auth.GetMiddlewareFunc())
-	g.GET("", cs.GetChatIDs)
-	g.POST("/create", cs.createChat)
+	g.GET("/listen/:chatid", cs.ListenForMessages)
 
-	g.POST("/addmessage", cs.addMessage)
+	gg := g.Group("")
+	gg.Use(cs.Auth.GetMiddlewareFunc())
+	gg.GET("", cs.GetChatIDs)
+	gg.POST("/create", cs.createChat)
+
+	gg.POST("/addmessage", cs.addMessage)
+
 }
 
 func (cs *ChatsControllers) createChat(c *gin.Context) {
@@ -56,7 +62,6 @@ func (cs *ChatsControllers) createChat(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, res.ToGetChat())
-	// c.JSON(http.StatusCreated, gin.H{})
 }
 
 func (cs *ChatsControllers) addMessage(c *gin.Context) {
@@ -91,6 +96,8 @@ func (cs *ChatsControllers) addMessage(c *gin.Context) {
 		return
 	}
 
+	cs.Hub.Notify(handle, newMessage.ChatID, res)
+
 	c.JSON(http.StatusCreated, res)
 }
 
@@ -101,11 +108,6 @@ func (cs *ChatsControllers) GetChatIDs(c *gin.Context) {
 		return
 	}
 
-	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
-		return
-	}
-
 	chatIDs, err := cs.Services.UserServicer.GetChatIDs(handle)
 	if err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
@@ -113,4 +115,27 @@ func (cs *ChatsControllers) GetChatIDs(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, chatIDs)
+}
+
+func (cs *ChatsControllers) ListenForMessages(c *gin.Context) {
+	// TODO is exposing the chat id like that ok?
+	handle, err := extract(middleware.IDKey, c)
+	if err != nil {
+		c.AbortWithError(http.StatusUnauthorized, err)
+		return
+	}
+
+	chatID := c.Param("chatid")
+
+	_, err = cs.Services.UserServicer.ByHandle(handle)
+	if err != nil {
+		// TODO only panic?
+		panic(err)
+	}
+
+	err = cs.Hub.Register(handle, chatID, c.Writer, c.Request)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
 }
