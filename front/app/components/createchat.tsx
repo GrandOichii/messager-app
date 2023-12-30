@@ -1,4 +1,4 @@
-import { Text, View, ViewProps } from "react-native"
+import { Pressable, Text, View, ViewProps } from "react-native"
 import { TextInput, TouchableOpacity } from "react-native-gesture-handler"
 import styles from "../../styles/styles"
 import { useState } from "react"
@@ -43,9 +43,9 @@ const CreateChat = (props: CreateChatProps) => {
             />
         </View>
         
-        <TouchableOpacity onPress={handleCreate} style={[{justifyContent: 'center', flex: 1, padding: 5}, styles.button]}>
+        <Pressable onPress={handleCreate} style={[{justifyContent: 'center', padding: 5}, styles.button]}>
             <Text style={{fontWeight: 'bold'}}>Create</Text>
-        </TouchableOpacity>
+        </Pressable>
     </View>
 }
 

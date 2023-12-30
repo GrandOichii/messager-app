@@ -1,4 +1,4 @@
-import { Alert, SafeAreaView, Text, TextInput, TouchableOpacity, View, ViewProps } from "react-native"
+import { Alert, Pressable, SafeAreaView, Text, TextInput, TouchableOpacity, View, ViewProps } from "react-native"
 import styles from "../../styles/styles"
 import { ComponentProps, useEffect, useState } from "react"
 import api from "../../api"
@@ -93,12 +93,12 @@ const Login = (props: LoginProps) => {
     return <SafeAreaView style={styles.container}>
         <View style={[styles.loginForm, styles.border]}>
             <View style={styles.row}>
-                <TouchableOpacity disabled={processing} onPress={() => setIsLogin(true)} style={[{flex:1, justifyContent: 'center', alignItems: 'center'}, isLogin ? styles.selectedLoginType : null]}>
+                <Pressable disabled={processing} onPress={() => setIsLogin(true)} style={[{flex:1, justifyContent: 'center', alignItems: 'center'}, isLogin ? styles.selectedLoginType : null]}>
                     <Text>Login</Text>
-                </TouchableOpacity>
-                <TouchableOpacity disabled={processing} onPress={() => setIsLogin(false)} style={[{flex:1, justifyContent: 'center', alignItems: 'center'}, !isLogin ? styles.selectedLoginType : null]}>
+                </Pressable>
+                <Pressable disabled={processing} onPress={() => setIsLogin(false)} style={[{flex:1, justifyContent: 'center', alignItems: 'center'}, !isLogin ? styles.selectedLoginType : null]}>
                     <Text>Register</Text>
-                </TouchableOpacity>
+                </Pressable>
             </View>
             <View style={styles.row}>
                 <View style={{justifyContent: 'center', flex: 1}}>
@@ -122,11 +122,11 @@ const Login = (props: LoginProps) => {
                 <TextInput editable={!processing} value={password} onChangeText={setPassword} style={[styles.formTextInput, {backgroundColor: mapInputColor(passwordError)}]} secureTextEntry={true} />
             </View>
             {/* // TODO figure out the disabled submit button color */}
-            <TouchableOpacity onPress={handleSubmit} style={[{flex: 1, alignItems: 'center', margin: 3}, styles.submit, {backgroundColor: canSubmit() ? '#ff69b4' : '#ff69b4' }]} disabled={!canSubmit()}>
+            <Pressable onPress={handleSubmit} style={[{flex: 1, alignItems: 'center', margin: 3}, styles.submit, {backgroundColor: canSubmit() ? '#ff69b4' : '#ff69b4' }]} disabled={!canSubmit()}>
                 <Text style={styles.submitText}>
                     {isLogin ? 'Login' : 'Register'}
                 </Text>
-            </TouchableOpacity>
+            </Pressable>
 
             {
                 failedLabel != '' &&

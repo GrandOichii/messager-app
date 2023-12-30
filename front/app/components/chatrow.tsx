@@ -1,4 +1,4 @@
-import { Text, View, ViewProps } from "react-native"
+import { Pressable, Text, View, ViewProps } from "react-native"
 import styles from "../../styles/styles"
 import { TouchableOpacity } from "react-native-gesture-handler"
 
@@ -15,11 +15,11 @@ const ChatRow = (props: ChatRowProps) => {
     }
 
     return <View style={[styles.chatRow, styles.border]}>
-        <TouchableOpacity onPress={onPress}>
+        <Pressable onPress={onPress}>
             <Text>
                 {props.chatID}
             </Text>
-        </TouchableOpacity>
+        </Pressable>
     </View>   
 }
 

@@ -50,7 +50,6 @@ func (nh *NotifyHub) Run() {
 }
 
 func (nh *NotifyHub) Register(handle string, chatID string, w http.ResponseWriter, r *http.Request) error {
-	// TODO
 	c := &Client{
 		Handle:        handle,
 		Authenticated: false,

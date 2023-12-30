@@ -1,4 +1,4 @@
-import { Text, TouchableOpacity, View, ViewProps } from "react-native"
+import { Pressable, Text, TouchableOpacity, View, ViewProps } from "react-native"
 import styles from "../../styles/styles"
 import { TextInput } from "react-native-gesture-handler"
 import { useEffect, useState } from "react"
@@ -28,11 +28,11 @@ const ChatDisplay = (props: ChatDisplayProps) => {
 
     return <View style={{flex: 1, margin: 5}}>
         <View style={[styles.border, styles.row, {alignItems: 'center'}]}>
-            <TouchableOpacity onPress={props.onBack} style={[{padding: 4}]}>
+            <Pressable onPress={props.onBack} style={[{padding: 4}]}>
                 <Text>
                     {"<"}
                 </Text>
-            </TouchableOpacity>
+            </Pressable>
             <Text style={{marginRight: 5, flex: 1, textAlign: 'right'}}>
                 {props.chatID}
             </Text>
@@ -47,11 +47,11 @@ const ChatDisplay = (props: ChatDisplayProps) => {
                 value={message}
                 onChangeText={setMessage}
             />
-            <TouchableOpacity onPress={handleSend} style={[styles.submit, {justifyContent: 'center', alignItems: 'center'}]}>
+            <Pressable onPress={handleSend} style={[styles.submit, {justifyContent: 'center', alignItems: 'center'}]}>
                 <Text>
                     Send
                 </Text>
-            </TouchableOpacity>
+            </Pressable>
         </View>
     </View>
 }
