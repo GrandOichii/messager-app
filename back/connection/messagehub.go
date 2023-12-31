@@ -1,6 +1,8 @@
 package connection
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -11,19 +13,35 @@ import (
 type MessageHub interface {
 	// Run()
 	Register(handle string, chatID string, w http.ResponseWriter, r *http.Request) error
-	Notify(handle string, chatID string, message *models.Message)
+	Notify(chatID string, message *models.Message)
+}
+
+// === Implementation ===
+
+type QueuedNotify struct {
+	ChatID  string
+	Message *models.Message
+}
+
+type QueuedRegister struct {
+	c      *Client
+	ChatID string
 }
 
 type Client struct {
-	Handle        string
-	Authenticated bool
+	Handle      string
+	Connection  *websocket.Conn
+	MessageType int
 }
 
 type NotifyHub struct {
 	// MessageHub
 
 	upgrader websocket.Upgrader
-	register chan *Client
+	chatMap  map[string][]*Client
+
+	register chan *QueuedRegister
+	notify   chan *QueuedNotify
 }
 
 func NewNotifyHub() *NotifyHub {
@@ -33,7 +51,9 @@ func NewNotifyHub() *NotifyHub {
 				return true
 			},
 		},
-		register: make(chan *Client),
+		chatMap:  map[string][]*Client{},
+		register: make(chan *QueuedRegister),
+		notify:   make(chan *QueuedNotify),
 	}
 	go result.Run()
 	return result
@@ -41,20 +61,40 @@ func NewNotifyHub() *NotifyHub {
 
 func (nh *NotifyHub) Run() {
 	for {
-
 		select {
-		case client := <-nh.register:
-			fmt.Println("Register request from " + client.Handle)
+		case qr := <-nh.register:
+			_, ok := nh.chatMap[qr.ChatID]
+			if !ok {
+				nh.chatMap[qr.ChatID] = []*Client{}
+			}
+			// TODO check if already exists
+			nh.chatMap[qr.ChatID] = append(nh.chatMap[qr.ChatID], qr.c)
+		case m := <-nh.notify:
+			clients, ok := nh.chatMap[m.ChatID]
+			if !ok {
+				// TODO
+				panic(errors.New("requested to notify users about chat message, but no users found"))
+			}
+			// TODO easier to just remove?
+			newClients := []*Client{}
+			for _, client := range clients {
+				data, err := json.Marshal(m.Message)
+				if err != nil {
+					// TODO
+					panic(err)
+				}
+				err = client.Connection.WriteMessage(client.MessageType, data)
+				if err == nil {
+					// TODO check if there are any errors beside disconnected
+					newClients = append(newClients, client)
+				}
+			}
+			nh.chatMap[m.ChatID] = newClients
 		}
 	}
 }
 
 func (nh *NotifyHub) Register(handle string, chatID string, w http.ResponseWriter, r *http.Request) error {
-	c := &Client{
-		Handle:        handle,
-		Authenticated: false,
-	}
-	nh.register <- c
 
 	conn, err := nh.upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -62,17 +102,34 @@ func (nh *NotifyHub) Register(handle string, chatID string, w http.ResponseWrite
 	}
 
 	// read jwt token
-	_, p, err := conn.ReadMessage()
+	mT, p, err := conn.ReadMessage()
 	if err != nil {
 		return err
 	}
 
+	token := string(p)
+
 	// TODO check jwt token for validity
-	fmt.Printf("string(p): %v\n", string(p))
+	fmt.Printf("token: %v\n", token)
+
+	c := &QueuedRegister{
+		ChatID: chatID,
+		c: &Client{
+			Handle:      handle,
+			Connection:  conn,
+			MessageType: mT,
+		},
+	}
+
+	nh.register <- c
 
 	return nil
 }
 
-func (nh *NotifyHub) Notify(handle string, chatID string, message *models.Message) {
-	// TODO
+func (nh *NotifyHub) Notify(chatID string, message *models.Message) {
+	m := &QueuedNotify{
+		ChatID:  chatID,
+		Message: message,
+	}
+	nh.notify <- m
 }
