@@ -6,8 +6,7 @@ interface MessageRowProps extends ViewProps {
 
 const MessageRow = (props: MessageRowProps) => {
 
-
-    return <View>
+    return <View style={[{flex: 1}]}>
         <Text>{`${props.message.uhandle}: ${props.message.text}`}</Text>
     </View>
 }

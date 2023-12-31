@@ -11,7 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type ChatsControllers struct {
+type ChatsController struct {
 	Controller
 
 	// UserServicer services.UserServicer
@@ -21,7 +21,7 @@ type ChatsControllers struct {
 	Hub      connection.MessageHub
 }
 
-func (cs *ChatsControllers) Map(r *gin.Engine) {
+func (cs *ChatsController) Map(r *gin.Engine) {
 	g := r.Group("/api/chats")
 
 	g.GET("/listen", cs.ListenForMessages)
@@ -29,13 +29,14 @@ func (cs *ChatsControllers) Map(r *gin.Engine) {
 	gg := g.Group("")
 	gg.Use(cs.Auth.GetMiddlewareFunc())
 	gg.GET("", cs.GetChatIDs)
+	gg.GET(":id", cs.ByID)
 	gg.POST("/create", cs.createChat)
 
 	gg.POST("/addmessage", cs.addMessage)
 
 }
 
-func (cs *ChatsControllers) createChat(c *gin.Context) {
+func (cs *ChatsController) createChat(c *gin.Context) {
 	var chatData models.CreateChat
 	var err error
 
@@ -64,7 +65,7 @@ func (cs *ChatsControllers) createChat(c *gin.Context) {
 	c.JSON(http.StatusCreated, res.ToGetChat())
 }
 
-func (cs *ChatsControllers) addMessage(c *gin.Context) {
+func (cs *ChatsController) addMessage(c *gin.Context) {
 	var newMessage models.PostMessage
 
 	if err := c.BindJSON(&newMessage); err != nil {
@@ -101,7 +102,7 @@ func (cs *ChatsControllers) addMessage(c *gin.Context) {
 	c.JSON(http.StatusCreated, res)
 }
 
-func (cs *ChatsControllers) GetChatIDs(c *gin.Context) {
+func (cs *ChatsController) GetChatIDs(c *gin.Context) {
 	handle, err := extract(middleware.IDKey, c)
 	if err != nil {
 		c.AbortWithError(http.StatusUnauthorized, err)
@@ -117,7 +118,7 @@ func (cs *ChatsControllers) GetChatIDs(c *gin.Context) {
 	c.JSON(http.StatusOK, chatIDs)
 }
 
-func (cs *ChatsControllers) ListenForMessages(c *gin.Context) {
+func (cs *ChatsController) ListenForMessages(c *gin.Context) {
 	// TODO is exposing the chat id like that ok?
 	var err error
 
@@ -136,4 +137,23 @@ func (cs *ChatsControllers) ListenForMessages(c *gin.Context) {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
+}
+
+func (cs *ChatsController) ByID(c *gin.Context) {
+	// TODO add message paging to query
+
+	_, err := extract(middleware.IDKey, c)
+	if err != nil {
+		c.AbortWithError(http.StatusUnauthorized, err)
+		return
+	}
+
+	cID := c.Param("id")
+	chat, err := cs.Services.ChatServicer.ByID(cID)
+	if err != nil {
+		c.AbortWithError(http.StatusUnauthorized, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, chat)
 }

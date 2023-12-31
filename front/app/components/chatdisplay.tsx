@@ -1,6 +1,6 @@
-import { Pressable, Text, TouchableOpacity, View, ViewProps } from "react-native"
+import { Pressable, Text, View, ViewProps } from "react-native"
 import styles from "../../styles/styles"
-import { ScrollView, TextInput } from "react-native-gesture-handler"
+import { FlatList, ScrollView, TextInput } from "react-native-gesture-handler"
 import { useEffect, useState } from "react"
 import api from "../../api"
 import { JwtPayload, jwtDecode } from "jwt-decode"
@@ -28,7 +28,6 @@ const ChatDisplay = (props: ChatDisplayProps) => {
     }
 
     useEffect(() => {
-
         const connWs = async () => {
             if (props.chatID == '') return
 
@@ -52,10 +51,12 @@ const ChatDisplay = (props: ChatDisplayProps) => {
 
             sock.onmessage = async (e) => {
                 const m = JSON.parse(e.data) as Message
-                setMessages([
-                    ...messages,
+
+                setMessages(prev => [
+                    ...prev,
                     m
                 ])
+
             }
 
             setSocket(sock)
@@ -66,40 +67,46 @@ const ChatDisplay = (props: ChatDisplayProps) => {
     }, [])
 
     const fetchMessages = async () => {
-        // TODO
+        // TODO check for errors
+        const req = await api.get(`/api/chats/${props.chatID}`)
+        const chat = req.data as Chat
+        setMessages(chat.messages)
     }
-    
-    const handleBack = async () => {        
+
+    const handleBack = async () => {
         socket!.close()
         props.onBack()
     }
 
-    return <View style={{flex: 1, margin: 5}}>
-        <View style={[styles.border, styles.row, {alignItems: 'center'}]}>
-            <Pressable onPress={handleBack} style={[{padding: 4}]}>
+    return <View style={{ flex: 1, margin: 5 }}>
+        <View style={[styles.border, styles.row, { alignItems: 'center' }]}>
+            <Pressable onPress={handleBack} style={[{ padding: 4 }]}>
                 <Text>
                     {"<"}
                 </Text>
             </Pressable>
-            <Text style={{marginRight: 5, flex: 1, textAlign: 'right'}}>
+            <Text style={{ marginRight: 5, flex: 1, textAlign: 'right' }}>
                 {props.chatID}
             </Text>
         </View>
-        <View style={{flex: 1}}>
-            <ScrollView>
-                {messages.map((m, index) => (
-                    <MessageRow key={index} message={m} />
-                ))}
-            </ScrollView>
+        {/* FIXME goes offscreen */}
+        <View style={{ flex: 1 }}>
+            <FlatList  
+                style={{ flex: 1 }}
+                data={messages}
+                renderItem={
+                    (item) => <MessageRow key={item.index} message={item.item} />
+                }
+            />
         </View>
-        <View style={[{flexDirection: 'row'}]}>
+        <View style={[{ flexDirection: 'row' }]}>
             <TextInput
                 placeholder="Enter message"
-                style={[styles.formTextInput, {padding: 4, marginRight: 3}]}
+                style={[styles.formTextInput, { padding: 4, marginRight: 3 }]}
                 value={message}
                 onChangeText={setMessage}
             />
-            <Pressable onPress={handleSend} style={[styles.submit, {justifyContent: 'center', alignItems: 'center'}]}>
+            <Pressable onPress={handleSend} style={[styles.submit, { justifyContent: 'center', alignItems: 'center' }]}>
                 <Text>
                     Send
                 </Text>

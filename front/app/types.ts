@@ -1,8 +1,8 @@
 
 type Chat = {
 	id: string
-    participants: Array<string>
-	// Messages           []*Message `json:"messages"`
+    participants: string[]
+	messages: Message[]
 }
 
 type Message = {

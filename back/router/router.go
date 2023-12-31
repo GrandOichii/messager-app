@@ -63,7 +63,7 @@ func (r *Router) createControllers() {
 			// UserServicer: r.UserServicer,
 			Auth: r.auth,
 		},
-		&controllers.ChatsControllers{
+		&controllers.ChatsController{
 			Services: r.Services,
 			// UserServicer: r.UserServicer,
 			// ChatServicer: r.ChatServicer,
