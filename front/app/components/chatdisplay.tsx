@@ -1,7 +1,7 @@
 import { Pressable, Text, View, ViewProps } from "react-native"
 import styles from "../../styles/styles"
 import { FlatList, ScrollView, TextInput } from "react-native-gesture-handler"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import api from "../../api"
 import { JwtPayload, jwtDecode } from "jwt-decode"
 import { getStored } from "../../storage"
@@ -13,6 +13,8 @@ interface ChatDisplayProps extends ViewProps {
 }
 
 const ChatDisplay = (props: ChatDisplayProps) => {
+    const listRef = useRef<FlatList>(null);
+    const [myHandle, setMyHandle] = useState('')
     const [socket, setSocket] = useState<WebSocket | null>(null)
 
     const [message, setMessage] = useState('')
@@ -39,8 +41,8 @@ const ChatDisplay = (props: ChatDisplayProps) => {
             const jwtData = jwtDecode(token!) as JwtPayload & {
                 handle: string
             }
-            const handle = jwtData.handle
-            const sock = new WebSocket(`ws://${host}/api/chats/listen?chatid=${props.chatID}&handle=${handle}`)
+            setMyHandle(jwtData.handle)
+            const sock = new WebSocket(`ws://${host}/api/chats/listen?chatid=${props.chatID}&handle=${jwtData.handle}`)
             sock.onopen = async () => {
                 sock.send(token!)
             }
@@ -93,11 +95,13 @@ const ChatDisplay = (props: ChatDisplayProps) => {
             
             // ? i have no idea why, but this fixes the ScrollView going offscreen 
             style={{ height: 0 }}
+            ref={listRef}
             
             data={messages}
             renderItem={
-                (item) => <MessageRow key={item.index} message={item.item} />
+                (item) => <MessageRow key={item.index} message={item.item} myHandle={myHandle} />
             }
+            onContentSizeChange={() => listRef.current!.scrollToEnd({ animated: true })}
         />
         <View style={[{ flexDirection: 'row' }]}>
             <TextInput
