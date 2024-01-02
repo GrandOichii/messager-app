@@ -1,4 +1,4 @@
-import { SafeAreaView, Text } from 'react-native'
+import { SafeAreaView, Text, View } from 'react-native'
 import Login from './components/login'
 import styles from '../styles/styles'
 import { useEffect, useState } from 'react'

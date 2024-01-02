@@ -89,16 +89,16 @@ const ChatDisplay = (props: ChatDisplayProps) => {
                 {props.chatID}
             </Text>
         </View>
-        {/* FIXME goes offscreen */}
-        <View style={{ flex: 1 }}>
-            <FlatList  
-                style={{ flex: 1 }}
-                data={messages}
-                renderItem={
-                    (item) => <MessageRow key={item.index} message={item.item} />
-                }
-            />
-        </View>
+        <FlatList
+            
+            // ? i have no idea why, but this fixes the ScrollView going offscreen 
+            style={{ height: 0 }}
+            
+            data={messages}
+            renderItem={
+                (item) => <MessageRow key={item.index} message={item.item} />
+            }
+        />
         <View style={[{ flexDirection: 'row' }]}>
             <TextInput
                 placeholder="Enter message"
