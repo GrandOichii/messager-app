@@ -52,7 +52,7 @@ const ChatDisplay = (props: ChatDisplayProps) => {
             }
 
             sock.onmessage = async (e) => {
-                const m = JSON.parse(e.data) as Message
+                const m = JSON.parse(e.data) as Message                
 
                 setMessages(prev => [
                     ...prev,
@@ -91,16 +91,28 @@ const ChatDisplay = (props: ChatDisplayProps) => {
                 {props.chatID}
             </Text>
         </View>
+        {/* <ScrollView
+            style={{height: 0}}
+        >
+
+        </ScrollView> */}
         <FlatList
             
-            // ? i have no idea why, but this fixes the ScrollView going offscreen 
-            style={{ height: 0 }}
-            ref={listRef}
+            style={{ 
+                // ? i have no idea why, but this fixes the ScrollView going offscreen 
+                height: 0, 
+
+                marginVertical: 5,
+                // borderColor: 'black',
+                // borderWidth: 1
+            }}
             
+            ref={listRef}
             data={messages}
             renderItem={
                 (item) => <MessageRow key={item.index} message={item.item} myHandle={myHandle} />
             }
+            
             onContentSizeChange={() => listRef.current!.scrollToEnd({ animated: true })}
         />
         <View style={[{ flexDirection: 'row' }]}>
