@@ -3,6 +3,8 @@ import styles from "../../styles/styles"
 import { ComponentProps, useEffect, useState } from "react"
 import api from "../../api"
 import { setStored } from "../../storage"
+import { createAvatar } from "@dicebear/core"
+import { micah } from "@dicebear/collection"
 
 interface LoginProps extends ViewProps {
     onLogin: () => void
@@ -57,10 +59,19 @@ const Login = (props: LoginProps) => {
         // TODO split register and login errors?
         try {
             if (!isLogin) {
+                // TODO add avatar customization
+                const avatar = createAvatar(micah, {
+                    seed: handle
+                })
+
+                // console.log(await avatar.png().toDataUri());
+                
+
                 const req = await api.post('/api/users/register', {
                     email: email,
                     handle: handle,
                     password: password,
+                    avatar_uri: await avatar.png().toDataUri()
                 })        
             }
         } catch (e) {

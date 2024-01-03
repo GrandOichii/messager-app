@@ -91,8 +91,11 @@ func (us *UserDBService) Register(newUser *models.CreateUser) (*models.GetUser, 
 
 	res := &models.User{
 		Handle: newUser.Handle,
+
 		// TODO hash email
-		EmailHash:    newUser.Email,
+		EmailHash: newUser.Email,
+
+		AvatarURI:    newUser.AvatarURI,
 		PasswordHash: passHash,
 		ChatIDs:      []string{},
 	}

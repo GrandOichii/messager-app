@@ -5,6 +5,7 @@ import "errors"
 // TODO move all DTOs to a separate folder
 
 type User struct {
+	AvatarURI    string   `json:"avatar_uri" bson:"avatar_uri"`
 	Handle       string   `json:"handle" bson:"handle"`
 	PasswordHash string   `json:"passhash" bson:"passhash"`
 	EmailHash    string   `json:"emailhash" bson:"emailhash"`
@@ -37,13 +38,17 @@ func (u *LoginUser) CheckValid() error {
 }
 
 type CreateUser struct {
-	Email    string `json:"email" required:"true"`
-	Password string `json:"password"`
-	Handle   string `json:"handle"`
+	// TODO takes up too much space, move to separate file
+	AvatarURI string `json:"avatar_uri" bson:"avatar_uri"`
+	Email     string `json:"email" required:"true"`
+	Password  string `json:"password"`
+	Handle    string `json:"handle"`
 }
 
 func (u *CreateUser) CheckValid() error {
-
+	if len(u.AvatarURI) == 0 {
+		return errors.New("can't create user with no avatar")
+	}
 	if len(u.Email) == 0 {
 		return errors.New("can't create user with no email")
 	}

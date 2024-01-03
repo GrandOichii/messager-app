@@ -24,6 +24,8 @@ func (uc *UsersController) Map(r *gin.Engine) {
 
 	g.POST("/register", uc.registerUser)
 	g.POST("/login", uc.Auth.Middle.LoginHandler)
+
+	g.GET("/avatar/:uhandle", uc.GetAvatar)
 }
 
 func (uc *UsersController) getUsers(c *gin.Context) {
@@ -40,6 +42,16 @@ func (uc *UsersController) getUsers(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, users)
+}
+
+func (uc *UsersController) GetAvatar(c *gin.Context) {
+	handle := c.Param("uhandle")
+	user, err := uc.Services.UserServicer.ByHandle(handle)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+	c.String(http.StatusOK, user.AvatarURI)
 }
 
 func (uc *UsersController) registerUser(c *gin.Context) {
