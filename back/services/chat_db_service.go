@@ -51,7 +51,6 @@ func (cs *ChatDBService) ByID(chatID string) (*models.Chat, error) {
 }
 
 func (cs *ChatDBService) Create(owner string, chatData *models.CreateChat) (*models.Chat, error) {
-	// TODO add the chat to the other user
 
 	other, err := cs.services.UserServicer.ByHandle(chatData.WithHandle)
 	if err != nil {
@@ -59,7 +58,10 @@ func (cs *ChatDBService) Create(owner string, chatData *models.CreateChat) (*mod
 	}
 
 	cursor := cs.dbClient.Database(constants.DB_NAME).Collection(CHATS_COLLECTION).FindOne(context.TODO(), bson.D{
-		{Key: "participants", Value: chatData.WithHandle},
+		{Key: "$and", Value: bson.D{
+			{Key: "participants", Value: chatData.WithHandle},
+			{Key: "participants", Value: owner},
+		}},
 	})
 
 	err = cursor.Err()

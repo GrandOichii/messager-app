@@ -23,12 +23,16 @@ type JwtMiddleware struct {
 	Middle *jwt.GinJWTMiddleware
 }
 
+func GetSecretKey() []byte {
+	// TODO add actual secret key
+	return []byte("secret key")
+}
+
 func CreateJwtMiddleware(services *services.Services) *JwtMiddleware {
 
 	authMiddleware, err := jwt.New(&jwt.GinJWTMiddleware{
-		Realm: "test zone",
-		// TODO add actual secret key
-		Key:        []byte("secret key"),
+		Realm:      "test zone",
+		Key:        GetSecretKey(),
 		Timeout:    time.Hour,
 		MaxRefresh: time.Hour,
 

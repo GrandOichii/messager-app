@@ -3,9 +3,11 @@ package connection
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"slices"
 
+	"github.com/GrandOichii/messager-app/back/middleware"
 	"github.com/GrandOichii/messager-app/back/models"
 	"github.com/GrandOichii/messager-app/back/services"
 	"github.com/gorilla/websocket"
@@ -67,6 +69,7 @@ func NewNotifyHub(services *services.Services) *NotifyHub {
 func (nh *NotifyHub) Run() {
 	for {
 		select {
+
 		case qr := <-nh.register:
 			_, ok := nh.chatMap[qr.ChatID]
 			if !ok {
@@ -74,11 +77,12 @@ func (nh *NotifyHub) Run() {
 			}
 			// * there is no check for multiple clients with the same handle, i think this should stay
 			nh.chatMap[qr.ChatID] = append(nh.chatMap[qr.ChatID], qr.c)
+
 		case m := <-nh.notify:
 			clients, ok := nh.chatMap[m.ChatID]
 			if !ok {
-				// TODO
-				panic(errors.New("requested to notify users about chat message, but no users found"))
+				fmt.Println("requested to notify users about chat message, but no users found")
+				continue
 			}
 
 			// create a new list with all the clients that received the message successfully, then assign this new list as the client list
@@ -96,6 +100,7 @@ func (nh *NotifyHub) Run() {
 			}
 			nh.chatMap[m.ChatID] = newClients
 		}
+
 	}
 }
 
@@ -115,7 +120,7 @@ func (nh *NotifyHub) Register(chatID string, w http.ResponseWriter, r *http.Requ
 	token := string(p)
 	claims := jwt.MapClaims{}
 	jwt.ParseWithClaims(token, claims, func(t *jwt.Token) (interface{}, error) {
-		return []byte("secret key"), nil
+		return middleware.GetSecretKey(), nil
 	})
 	handle := claims["handle"].(string)
 
