@@ -20,9 +20,7 @@ const MessageRow = (props: MessageRowProps) => {
     useEffect(() => {
         (async () => {
             const aUri = await getAvatar(props.message.uhandle)
-            setAvatarUri(aUri)
-            console.log(aUri);
-            
+            setAvatarUri(aUri)            
         })()
     }, [])
 

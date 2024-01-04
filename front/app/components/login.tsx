@@ -56,16 +56,12 @@ const Login = (props: LoginProps) => {
         setFailedLabel('')
         setProcessing(true)
         
-        // TODO split register and login errors?
         try {
             if (!isLogin) {
                 // TODO add avatar customization
                 const avatar = createAvatar(micah, {
                     seed: handle
-                })
-
-                // console.log(await avatar.png().toDataUri());
-                
+                })                
 
                 const req = await api.post('/api/users/register', {
                     email: email,

@@ -3,16 +3,18 @@ package connection
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
+	"slices"
 
 	"github.com/GrandOichii/messager-app/back/models"
+	"github.com/GrandOichii/messager-app/back/services"
 	"github.com/gorilla/websocket"
+	"gopkg.in/dgrijalva/jwt-go.v3"
 )
 
 type MessageHub interface {
 	// Run()
-	Register(handle string, chatID string, w http.ResponseWriter, r *http.Request) error
+	Register(chatID string, w http.ResponseWriter, r *http.Request) error
 	Notify(chatID string, message *models.Message)
 }
 
@@ -37,6 +39,8 @@ type Client struct {
 type NotifyHub struct {
 	// MessageHub
 
+	Services *services.Services
+
 	upgrader websocket.Upgrader
 	chatMap  map[string][]*Client
 
@@ -44,8 +48,9 @@ type NotifyHub struct {
 	notify   chan *QueuedNotify
 }
 
-func NewNotifyHub() *NotifyHub {
+func NewNotifyHub(services *services.Services) *NotifyHub {
 	result := &NotifyHub{
+		Services: services,
 		upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
 				return true
@@ -67,7 +72,7 @@ func (nh *NotifyHub) Run() {
 			if !ok {
 				nh.chatMap[qr.ChatID] = []*Client{}
 			}
-			// TODO check if already exists
+			// * there is no check for multiple clients with the same handle, i think this should stay
 			nh.chatMap[qr.ChatID] = append(nh.chatMap[qr.ChatID], qr.c)
 		case m := <-nh.notify:
 			clients, ok := nh.chatMap[m.ChatID]
@@ -75,17 +80,17 @@ func (nh *NotifyHub) Run() {
 				// TODO
 				panic(errors.New("requested to notify users about chat message, but no users found"))
 			}
-			// TODO easier to just remove?
+
+			// create a new list with all the clients that received the message successfully, then assign this new list as the client list
 			newClients := []*Client{}
 			for _, client := range clients {
 				data, err := json.Marshal(m.Message)
 				if err != nil {
-					// TODO
+					// * shouldn't throw any errors, as the marshal method breaks only when the data is cyclical
 					panic(err)
 				}
 				err = client.Connection.WriteMessage(client.MessageType, data)
 				if err == nil {
-					// TODO check if there are any errors beside disconnected
 					newClients = append(newClients, client)
 				}
 			}
@@ -94,23 +99,40 @@ func (nh *NotifyHub) Run() {
 	}
 }
 
-func (nh *NotifyHub) Register(handle string, chatID string, w http.ResponseWriter, r *http.Request) error {
+func (nh *NotifyHub) Register(chatID string, w http.ResponseWriter, r *http.Request) error {
 
 	conn, err := nh.upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		return err
+		panic(err)
 	}
 
 	// read jwt token
 	mT, p, err := conn.ReadMessage()
 	if err != nil {
-		return err
+		panic(err)
 	}
 
 	token := string(p)
+	claims := jwt.MapClaims{}
+	jwt.ParseWithClaims(token, claims, func(t *jwt.Token) (interface{}, error) {
+		return []byte("secret key"), nil
+	})
+	handle := claims["handle"].(string)
 
-	// TODO check jwt token for validity
-	fmt.Printf("token: %v\n", token)
+	_, err = nh.Services.UserServicer.ByHandle(handle)
+	if err != nil {
+		return err
+	}
+
+	chat, err := nh.Services.ChatServicer.ByID(chatID)
+	if err != nil {
+		return err
+	}
+
+	contains := slices.Contains(chat.ParticipantHandles, handle)
+	if !contains {
+		return errors.New("requested to listen for chat messages when not being a participant")
+	}
 
 	c := &QueuedRegister{
 		ChatID: chatID,

@@ -119,22 +119,18 @@ func (cs *ChatsController) GetChatIDs(c *gin.Context) {
 }
 
 func (cs *ChatsController) ListenForMessages(c *gin.Context) {
-	// TODO is exposing the chat id like that ok?
+	// ? is exposing the chat id like that ok?
 	var err error
 
-	// TODO check for validity
 	chatID := c.Query("chatid")
-	handle := c.Query("handle")
-
-	_, err = cs.Services.UserServicer.ByHandle(handle)
-	if err != nil {
-		// TODO only panic?
-		panic(err)
+	if chatID == "" {
+		c.AbortWithError(http.StatusBadRequest, errors.New("chat id not specified"))
+		return
 	}
 
-	err = cs.Hub.Register(handle, chatID, c.Writer, c.Request)
+	err = cs.Hub.Register(chatID, c.Writer, c.Request)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 }
